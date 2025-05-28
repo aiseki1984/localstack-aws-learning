@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack
+    ports:
+      - '127.0.0.1:4566:4566'
+      - '127.0.0.1:4510-4559:4510-4559'
+    environment:
+      DOCKER_HOST: unix:///var/run/docker.sock
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - default
+    restart: always
+
+  # CLI Client
+  localstack_client:
+    build:
+      context: .docker/ubuntu
+      dockerfile: Dockerfile
+    container_name: localstack_client
+    hostname: localstack_client
+    restart: always
+    volumes:
+      - ./workspace:/home/ubuntu/workspace
+    tty: true
+    environment:
+      TZ: Asia/Tokyo
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+    networks:
+      - default
+    command: >
+      sh -c "echo 'alias aws=\"aws --endpoint-url=$$AWS_ENDPOINT_URL\"' >> ~/.bashrc && exec bash"
+
+# ネットワーク
+networks:
+  default:
+    driver: bridge
