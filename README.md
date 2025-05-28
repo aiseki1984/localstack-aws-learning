@@ -8,6 +8,25 @@ https://www.localstack.cloud/
 
 LocalStack を使って、端末内だけで AWS の学習をしたい
 
+## プロジェクト一覧
+
+### Project-01: AWS CLI 基礎
+
+- IAM、S3、Lambda、API Gateway の基本操作
+- AWS CLI コマンドによる手動リソース管理
+
+### Project-02: Terraform IaC
+
+- Terraform を使った Infrastructure as Code
+- Lambda + API Gateway の自動化構築
+- 詳細なリソース制御と Terraform 状態管理
+
+### Project-03: SAM サーバーレス
+
+- AWS SAM (Serverless Application Model)
+- サーバーレス特化の効率的な開発
+- ローカル開発環境とワンコマンドデプロイ
+
 ## 使い方
 
 ```shell

@@ -28,6 +28,8 @@ services:
     build:
       context: .docker/ubuntu
       dockerfile: Dockerfile
+      args:
+        NODE_VERSION: 20 # Node.jsバージョンを指定
     container_name: localstack_client
     hostname: localstack_client
     restart: always
