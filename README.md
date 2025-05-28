@@ -1,16 +1,25 @@
-# LocalStack でawsの 学習
+# LocalStack AWS Learning
+
+LocalStack を使って、ローカル環境で AWS サービスの学習を行うためのリポジトリです。
 
 https://www.localstack.cloud/
 
+## 概要
+
 LocalStack を使って、端末内だけで AWS の学習をしたい
 
-## usage
+## 使い方
 
 ```shell
-$ docker compose -f docker-compose.yml up -d
+$ docker compose up -d
 $ docker compose exec localstack_client bash
 ```
 
+## 特徴
+
+- Windows/Mac 両対応のマルチプラットフォーム構成
+- AWS CLI v2 が自動でアーキテクチャに応じてインストール
+- LocalStack 用のエイリアス設定済み
 
 ## 参考
 
