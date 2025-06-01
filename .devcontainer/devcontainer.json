@@ -39,7 +39,8 @@
         "editorconfig.editorconfig",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "dsznajder.es7-react-js-snippets"
+        "dsznajder.es7-react-js-snippets",
+        "bierner.markdown-mermaid"
       ],
       "settings": {
         "editor.tabSize": 4
