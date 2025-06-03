@@ -151,6 +151,7 @@ while read -r api_id; do
     while read -r stage; do
         echo "Stage: $stage"
         echo "Endpoint: https://$api_id.execute-api.us-east-1.amazonaws.com/$stage"
+        echo "Endpoint LocalStack: http://localstack:4566/restapis/$api_id/$stage/_user_request_/"
 
         # リソースとメソッドを取得
         aws apigateway get-resources --rest-api-id $api_id --query 'items[*]' | \

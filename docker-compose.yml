@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   localstack:
     container_name: localstack
@@ -31,12 +29,13 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_VERSION: 20 # Node.jsバージョンを指定
-        PYTHON_VERSION: 3.11 # Pythonバージョンを指定
+        PYTHON_VERSION: 3.12 # Pythonバージョンを指定
     container_name: localstack_client
     hostname: localstack_client
     restart: always
     volumes:
       - ./workspace:/home/ubuntu/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
     tty: true
     environment:
       TZ: Asia/Tokyo

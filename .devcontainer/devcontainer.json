@@ -40,14 +40,23 @@
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "dsznajder.es7-react-js-snippets",
-        "bierner.markdown-mermaid"
+        "bierner.markdown-mermaid",
+        "amazonwebservices.aws-toolkit-vscode",
+        "ms-python.python",
+        "ms-python.black-formatter"
       ],
       "settings": {
-        "editor.tabSize": 4
+        "editor.tabSize": 4,
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "aws.telemetry": false
       }
     }
-  }
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.gitconfig,target=/home/ubuntu/.gitconfig,type=bind,consistency=cached"
+  ],
 
+  "remoteUser": "ubuntu"
   // Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
   // "remoteUser": "devcontainer"
 }
