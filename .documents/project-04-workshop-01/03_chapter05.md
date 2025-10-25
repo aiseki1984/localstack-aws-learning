@@ -33,6 +33,8 @@ us-east-1 で作業していたので、ap-northeast-1 から us-east-1 に変�
 
 ```shell
 $ cd ${CODESPACE_VSCODE_FOLDER}/chapter05
+$ sam --version
+
 $ sam build
 $ sam deploy
 

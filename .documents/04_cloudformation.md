@@ -70,6 +70,24 @@ Successfully created/updated stack - chapter04-stack
 $ aws sqs list-queues
 $ aws s3 ls
 $ aws cloudformation describe-stacks
+$ aws cloudformation list-stacks
+
+$ aws cloudformation list-stacks | jq '.StackSummaries[] | {name: .StackName, status: .StackStatus}'
+
+# 削除対象のスタックを確認（ステータス付き）
+$ aws cloudformation list-stacks | jq '.StackSummaries[] | select(.StackStatus != "DELETE_COMPLETE") | {name: .StackName, status: .StackStatus}'
+
+# 削除用のスタック名リスト
+$ aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackStatus != "DELETE_COMPLETE") | .StackName'
+```
+
+```sh
+# 安全な一括削除（確認付き）
+for stack in $(aws cloudformation list-stacks | jq -r '.StackSummaries[] | select(.StackStatus != "DELETE_COMPLETE") | .StackName'); do
+  echo "Deleting stack: $stack"
+  aws cloudformation delete-stack --stack-name "$stack"
+  sleep 2  # 少し待機
+done
 ```
 
 ## スタックの削除
