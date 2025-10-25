@@ -4,6 +4,9 @@
 
 ```shell
 aws s3 mb s3://my-test-bucket
+
+## バケットの確認
+aws s3 ls
 ```
 
 ## ファイルをアップロード

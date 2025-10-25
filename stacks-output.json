@@ -1,0 +1,20 @@
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-east-1:000000000000:stack/chapter04-stack/cc874c88-2463-4d8f-9329-363d64395454",
+            "StackName": "chapter04-stack",
+            "ChangeSetId": "arn:aws:cloudformation:us-east-1:000000000000:changeSet/awscli-cloudformation-package-deploy-1761396859/6425b5de",
+            "CreationTime": "2025-10-25T12:54:19.828523+00:00",
+            "LastUpdatedTime": "2025-10-25T12:54:19.828523+00:00",
+            "RollbackConfiguration": {},
+            "StackStatus": "CREATE_COMPLETE",
+            "DisableRollback": false,
+            "NotificationARNs": [],
+            "Tags": [],
+            "EnableTerminationProtection": false,
+            "DriftInformation": {
+                "StackDriftStatus": "NOT_CHECKED"
+            }
+        }
+    ]
+}

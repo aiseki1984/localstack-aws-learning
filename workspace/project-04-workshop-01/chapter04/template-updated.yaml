@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: chapter04-queue
+      ReceiveMessageWaitTimeSeconds: 10 # 20秒から10秒に変更
+      VisibilityTimeoutSeconds: 30 # 新しい設定を追加
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: chapter04-bucket
+      VersioningConfiguration: # バージョニングを有効化
+        Status: Enabled
+  # 新しいリソース: DynamoDBテーブル
+  UserTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: chapter04-users
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST

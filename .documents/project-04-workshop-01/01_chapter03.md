@@ -115,6 +115,8 @@ $ aws sqs receive-message \
 
 ### Python コードで操作する
 
+python で SQS メッセージを s3 に保存する。
+
 ```shell
 $ pip freeze | grep boto3
 boto3==1.38.24
@@ -129,6 +131,7 @@ $ aws s3 ls s3://chapter03-bucket
 $ aws s3 sync s3://chapter03-bucket/ ./local-folder
 
 # キューの内容を見てみる
+# 処理したので、何もないはず。
 $ aws sqs receive-message \
   --queue-url http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/chapter03-queue-03 \
   --max-number-of-messages 10 \

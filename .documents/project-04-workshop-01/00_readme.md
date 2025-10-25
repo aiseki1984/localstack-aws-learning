@@ -32,3 +32,14 @@ $ aws sqs create-queue \
     "QueueUrl": "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/chapter02-queue-awslocal"
 }
 ```
+
+```bash
+# SQS リソースを確認
+aws sqs list-queues
+# キューを作成
+aws sqs create-queue --queue-name my-queue
+# キューの URL を取得
+aws sqs get-queue-url --queue-name my-queue
+# キューを削除
+aws sqs delete-queue --queue-url <QUEUE_URL>
+```

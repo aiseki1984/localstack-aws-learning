@@ -8,6 +8,12 @@ https://www.localstack.cloud/
 
 LocalStack を使って、端末内だけで AWS の学習をしたい
 
+## 特徴
+
+- Windows/Mac 両対応のマルチプラットフォーム構成
+- AWS CLI v2 が自動でアーキテクチャに応じてインストール
+- LocalStack 用のエイリアス設定済み
+
 ## プロジェクト一覧
 
 ### Project-01: AWS CLI 基礎
@@ -29,16 +35,15 @@ LocalStack を使って、端末内だけで AWS の学習をしたい
 
 ## 使い方
 
+devcontainer を使って、 `localstack_client` サービスにアタッチしてください。
+そうでなければ、以下の手順でアタッチしてください。
+
+### docker compose
+
 ```shell
 $ docker compose up -d
 $ docker compose exec localstack_client bash
 ```
-
-## 特徴
-
-- Windows/Mac 両対応のマルチプラットフォーム構成
-- AWS CLI v2 が自動でアーキテクチャに応じてインストール
-- LocalStack 用のエイリアス設定済み
 
 ## 参考
 

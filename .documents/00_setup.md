@@ -180,3 +180,23 @@ docker run -it --rm \
 ```
 export SAM_CLI_ENDPOINT_URL="http://localstack:4566"
 ```
+
+### 余談 jq コマンド
+
+jq は、JSON データを処理・操作するためのコマンドライン ツールです。「JSON Query」の略で、JSON の解析、フィルタリング、変換、整形などを行うことができる非常に強力なツールです。
+
+#### 基本的な使い方
+
+```bash
+# JSONを見やすく整形
+aws cloudformation describe-stacks | jq '.'
+
+# スタック名のみを抽出
+aws cloudformation describe-stacks | jq '.Stacks[0].StackName'
+
+# スタック名とステータスを抽出
+aws cloudformation describe-stacks | jq '.Stacks[] | {name: .StackName, status: .StackStatus}'
+
+# S3バケット名一覧を取得
+aws s3api list-buckets | jq '.Buckets[].Name'
+```
