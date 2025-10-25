@@ -90,6 +90,16 @@ for stack in $(aws cloudformation list-stacks | jq -r '.StackSummaries[] | selec
 done
 ```
 
+### 💡 **自動作成されるスタックについて**
+
+AWS CLI や SAM を使用すると、以下のような管理用スタックが自動作成されます：
+
+- **`aws-sam-cli-managed-default`**: SAM CLI 用の S3 バケット管理スタック
+- **`{project}-sync`**: `sam sync`コマンド実行時の開発用スタック
+- **`{project}-CompanionStack`**: SAM 内部処理用の補助スタック
+
+これらは通常、手動で削除する必要はありませんが、完全なクリーンアップ時には削除対象となります。
+
 ## スタックの削除
 
 **重要**: リソースの削除はコスト管理の観点から必須の操作です。

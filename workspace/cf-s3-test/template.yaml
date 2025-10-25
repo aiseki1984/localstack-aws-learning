@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'S3 bucket deletion test with CloudFormation'
+
+Resources:
+  TestBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: cf-test-bucket-versioned
+      VersioningConfiguration:
+        Status: Enabled
+      # 削除時の動作を制御
+      # DeletionPolicy: Retain  # スタック削除時もバケット保持
+      # DeletionPolicy: Delete  # 空の場合のみ削除（デフォルト）
+
+Outputs:
+  BucketName:
+    Description: 'Created S3 Bucket Name'
+    Value: !Ref TestBucket
+  BucketArn:
+    Description: 'Created S3 Bucket ARN'
+    Value: !GetAtt TestBucket.Arn
