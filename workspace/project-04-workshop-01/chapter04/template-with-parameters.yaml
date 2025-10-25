@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'CloudFormation template with parameters for flexible deployment'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, test, prod]
+    Description: 'Environment name (dev, test, prod)'
+
+  ProjectName:
+    Type: String
+    Default: chapter04
+    Description: 'Project name for resource naming'
+
+  QueueWaitTime:
+    Type: Number
+    Default: 20
+    MinValue: 0
+    MaxValue: 900
+    Description: 'SQS receive message wait time in seconds'
+
+Resources:
+  Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${ProjectName}-${Environment}-queue'
+      ReceiveMessageWaitTimeSeconds: !Ref QueueWaitTime
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-${Environment}-bucket'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: !Ref ProjectName
+
+Outputs:
+  QueueName:
+    Description: 'SQS Queue Name'
+    Value: !Ref Queue
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-QueueName'
+
+  QueueURL:
+    Description: 'SQS Queue URL'
+    Value: !Ref Queue
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-QueueURL'
+
+  BucketName:
+    Description: 'S3 Bucket Name'
+    Value: !Ref Bucket
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-BucketName'

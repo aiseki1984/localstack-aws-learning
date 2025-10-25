@@ -148,11 +148,33 @@ $ echo "=== デプロイ後のDynamoDBテーブル ===" && aws dynamodb list-tab
 
 ### 2. **パラメータの活用**
 
+テンプレートを再利用可能にし、デプロイ時に値を指定できる機能です。同じテンプレートで開発・テスト・本番環境を作成可能。
+
 ```yaml
 Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, test, prod]
   BucketName:
     Type: String
     Default: my-default-bucket
+
+Resources:
+  Bucket:
+    Properties:
+      BucketName: !Sub '${Environment}-${BucketName}' # dev-my-default-bucket
+```
+
+```sh
+# デフォルト値でデプロイ
+aws cloudformation deploy --stack-name dev-stack --template-file template.yaml
+
+# パラメータを指定してデプロイ
+aws cloudformation deploy \
+  --stack-name prod-stack \
+  --template-file template.yaml \
+  --parameter-overrides Environment=prod BucketName=production-bucket
 ```
 
 ### 3. **出力の定義**
