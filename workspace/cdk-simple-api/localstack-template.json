@@ -1,0 +1,194 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Simple API Stack for LocalStack",
+  "Resources": {
+    "HelloFunctionServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ]
+      }
+    },
+    "HelloFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": "HelloFunction",
+        "Runtime": "nodejs18.x",
+        "Handler": "hello.handler",
+        "Role": {
+          "Fn::GetAtt": ["HelloFunctionServiceRole", "Arn"]
+        },
+        "Code": {
+          "ZipFile": "exports.handler = async (event) => { console.log('Event:', JSON.stringify(event, null, 2)); const path = event.path || event.rawPath || '/'; const method = event.httpMethod || event.requestContext?.http?.method || 'GET'; const responseBody = { message: 'Hello from LocalStack API Gateway!', timestamp: new Date().toISOString(), path: path, method: method, requestId: event.requestContext?.requestId || 'unknown' }; const response = { statusCode: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS' }, body: JSON.stringify(responseBody, null, 2) }; console.log('Response:', JSON.stringify(response, null, 2)); return response; };"
+        },
+        "Timeout": 30,
+        "Environment": {
+          "Variables": {
+            "NODE_ENV": "production"
+          }
+        }
+      }
+    },
+    "SimpleApi": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "Simple Service",
+        "Description": "This service serves a simple API with LocalStack."
+      }
+    },
+    "HelloResource": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": ["SimpleApi", "RootResourceId"]
+        },
+        "PathPart": "hello",
+        "RestApiId": {
+          "Ref": "SimpleApi"
+        }
+      }
+    },
+    "RootGetMethod": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "ResourceId": {
+          "Fn::GetAtt": ["SimpleApi", "RootResourceId"]
+        },
+        "RestApiId": {
+          "Ref": "SimpleApi"
+        },
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloFunction.Arn}/invocations"
+          }
+        }
+      }
+    },
+    "HelloGetMethod": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "ResourceId": {
+          "Ref": "HelloResource"
+        },
+        "RestApiId": {
+          "Ref": "SimpleApi"
+        },
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloFunction.Arn}/invocations"
+          }
+        }
+      }
+    },
+    "HelloPostMethod": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "ResourceId": {
+          "Ref": "HelloResource"
+        },
+        "RestApiId": {
+          "Ref": "SimpleApi"
+        },
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "Uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HelloFunction.Arn}/invocations"
+          }
+        }
+      }
+    },
+    "LambdaPermissionRoot": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "HelloFunction"
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SimpleApi}/*/GET/"
+        }
+      }
+    },
+    "LambdaPermissionHelloGet": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "HelloFunction"
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SimpleApi}/*/GET/hello"
+        }
+      }
+    },
+    "LambdaPermissionHelloPost": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "HelloFunction"
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SimpleApi}/*/POST/hello"
+        }
+      }
+    },
+    "ApiDeployment": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Ref": "SimpleApi"
+        },
+        "StageName": "prod"
+      },
+      "DependsOn": ["RootGetMethod", "HelloGetMethod", "HelloPostMethod"]
+    }
+  },
+  "Outputs": {
+    "ApiGatewayUrl": {
+      "Description": "API Gateway endpoint URL",
+      "Value": {
+        "Fn::Sub": "https://${SimpleApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+      }
+    },
+    "HelloEndpoint": {
+      "Description": "Hello endpoint URL",
+      "Value": {
+        "Fn::Sub": "https://${SimpleApi}.execute-api.${AWS::Region}.amazonaws.com/prod/hello"
+      }
+    },
+    "ApiId": {
+      "Description": "API Gateway ID",
+      "Value": {
+        "Ref": "SimpleApi"
+      }
+    }
+  }
+}
