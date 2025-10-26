@@ -94,6 +94,13 @@ RUN pip3 install --upgrade pip setuptools wheel && \
         flake8 \
         requests
 
+# AWS CDK と TypeScript 関連のインストール
+RUN npm install -g \
+        aws-cdk \
+        typescript \
+        ts-node \
+        @types/node
+
 # Docker CLI
 # Docker on Docker (DoD) 
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
