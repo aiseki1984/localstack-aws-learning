@@ -27,7 +27,7 @@ zip にまとめて、Lambda 関数を作成する
 zip function.zip index.js
 aws lambda create-function \
     --function-name localstack-lambda-url-example \
-    --runtime nodejs18.x \
+    --runtime nodejs22.x \
     --zip-file fileb://function.zip \
     --handler index.handler \
     --role arn:aws:iam::000000000000:role/lambda-role

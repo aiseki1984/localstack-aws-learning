@@ -21,6 +21,11 @@ aws apigateway create-rest-api \
     "disableExecuteApiEndpoint": false,
     "rootResourceId": "f83xwiji0w"
 }
+
+# すべての REST API を取得
+aws apigateway get-rest-apis
+# 特定の API の詳細を取得
+aws apigateway get-rest-api --rest-api-id abc123def4
 ```
 
 作成された API の ID を取得 （parent-id も含めて）
@@ -81,8 +86,38 @@ aws apigateway put-method \
     "authorizationType": "NONE",
     "apiKeyRequired": false
 }
+```
 
+リソースに対して、Lambda 統合を設定する。
+そのために、先ほど作った Lambda 関数の ARN を取得する
+
+```sh
+# 1. Lambda 関数の ARN を取得
+LAMBDA_ARN=$(aws lambda get-function \
+    --function-name localstack-lambda-url-example \
+    --query 'Configuration.FunctionArn' --output text)
+
+echo "Lambda ARN: $LAMBDA_ARN"
+
+# 2. API Gateway 統合用の URI を構築
+# `arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/` はプレフィックス。固定のAPI Gateway Lambda 統合URI
+INTEGRATION_URI="arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/${LAMBDA_ARN}/invocations"
+
+echo "Integration URI: $INTEGRATION_URI"
+
+# 3. 統合を設定
+aws apigateway put-integration \
+    --rest-api-id $API_ID \
+    --resource-id $RESOURCE_ID \
+    --http-method POST \
+    --type AWS_PROXY \
+    --integration-http-method POST \
+    --uri "$INTEGRATION_URI"
+```
+
+```sh
 # リソースに対して、Lambda統合を設定
+# 上記のようにLambda統合をしたら、飛ばしていい
 aws apigateway put-integration \
     --rest-api-id $API_ID \
     --resource-id $RESOURCE_ID \
@@ -101,6 +136,12 @@ aws apigateway put-integration \
     "cacheKeyParameters": []
 }
 
+# ここでもう一度リソースを確認してもいい
+aws apigateway get-resources --rest-api-id $API_ID
+# /calc の POST に Integration が当たっていることが確認できる。
+```
+
+```sh
 # デプロイメントを作成
 ## 実際にアクセスを可能にする。
 aws apigateway create-deployment \
@@ -111,6 +152,10 @@ aws apigateway create-deployment \
     "id": "g7jwtnvhz2",
     "createdDate": "2025-02-17T21:25:25+09:00"
 }
+
+# デプロイメントの確認
+aws apigateway get-stages --rest-api-id $API_ID
+
 ```
 
 これで curl コマンドでアクセスできる。

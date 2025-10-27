@@ -1,0 +1,7 @@
+API ID: mwodbx5w9r
+API Name: LambdaAPI
+Stage: prod
+Endpoint: https://mwodbx5w9r.execute-api.us-east-1.amazonaws.com/prod
+Endpoint LocalStack: http://localstack:4566/restapis/mwodbx5w9r/prod/_user_request_/
+Method: POST Path: /calc
+-------------------
