@@ -1,4 +1,7 @@
-# File Upload API - AWS CDK Project
+# File Upload API - AWS CDK Project 保留
+
+保留、思ったようにうまく進まない。
+まず lambda, apigateway, s3 などそれぞれ学習してから、進める。
 
 ## 🎯 プロジェクト目的
 

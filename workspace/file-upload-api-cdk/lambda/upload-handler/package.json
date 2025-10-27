@@ -1,0 +1,16 @@
+{
+  "name": "simple-json-handler",
+  "version": "1.0.0",
+  "description": "Simple JSON processing Lambda handler",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.8.6",
+    "typescript": "^5.6.3"
+  }
+}

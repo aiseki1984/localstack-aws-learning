@@ -11,6 +11,9 @@ services:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       AWS_DEFAULT_REGION: us-east-1
+      MAIN_CONTAINER_NAME: localstack
+      HOSTNAME: localstack
+      HOSTNAME_EXTERNAL: localstack
       # # 永続化設定
       # PERSISTENCE: 1
       # PERSISTENCE_BACKEND: filesystem
