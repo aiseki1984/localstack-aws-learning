@@ -1,0 +1,18 @@
+Hello, World!
+
+This is a sample text file for testing Lambda + S3 operations.
+Created for multi-language Lambda practice project.
+
+Languages to test:
+- JavaScript ✨
+- TypeScript 🔷
+- Python 🐍
+
+Test operations:
+1. Upload file to S3
+2. List files in S3
+3. Read file from S3
+4. Update file content
+5. Delete file from S3
+
+Happy coding! 🚀
