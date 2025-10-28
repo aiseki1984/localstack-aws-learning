@@ -5,14 +5,14 @@
 echo "🚀 Deploying Python Lambda function..."
 
 # 設定読み込み
-source ../config.env
+source ./config.env
 
 FUNCTION_NAME="s3-practice-python"
 HANDLER="lambda_function.lambda_handler"
 RUNTIME="python3.9"
 
 # Python ディレクトリに移動
-cd ../python
+cd ./python
 
 echo "📄 Creating deployment package..."
 zip -r lambda-deployment.zip . -x "*.git*" "test-files/*"

@@ -55,7 +55,7 @@ aws s3api put-object \
   --region $AWS_REGION
 
 # config.envファイルを作成（プロジェクトルート）
-CONFIG_FILE="../config.env"
+CONFIG_FILE="./config.env"
 echo "📝 Creating config file: $CONFIG_FILE"
 cat > $CONFIG_FILE << EOF
 # LocalStack Configuration for Lambda S3 Practice

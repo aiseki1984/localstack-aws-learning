@@ -9,7 +9,7 @@ source config.env
 
 FUNCTION_NAME="s3-practice-js"
 HANDLER="index.handler"
-RUNTIME="nodejs18.x"
+RUNTIME="nodejs20.x"
 
 # JavaScript ディレクトリに移動
 cd javascript

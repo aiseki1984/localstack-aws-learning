@@ -9,10 +9,10 @@ source ../config.env
 
 FUNCTION_NAME="s3-practice-ts"
 HANDLER="index.handler"
-RUNTIME="nodejs18.x"
+RUNTIME="nodejs20.x"
 
 # TypeScript ディレクトリに移動
-cd ../typescript
+cd ./typescript
 
 echo "📦 Installing dependencies..."
 npm install

@@ -76,7 +76,7 @@ echo "✅ IAM role setup completed!"
 echo "Role ARN: arn:aws:iam::000000000000:role/$ROLE_NAME"
 
 # 設定を環境変数ファイルに保存
-cat > ../config.env << EOF
+cat > ./config.env << EOF
 # Lambda S3 Practice Configuration
 export LAMBDA_ROLE_ARN="arn:aws:iam::000000000000:role/$ROLE_NAME"
 export S3_BUCKET_NAME="lambda-s3-practice"
