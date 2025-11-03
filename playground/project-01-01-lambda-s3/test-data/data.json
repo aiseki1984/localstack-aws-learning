@@ -1,0 +1,15 @@
+{
+  "project": "lambda-s3-practice",
+  "languages": ["javascript", "typescript", "python"],
+  "operations": ["upload", "list", "read", "update", "delete"],
+  "testData": {
+    "message": "Hello from JSON test data!",
+    "timestamp": "2025-01-01T00:00:00.000Z",
+    "numbers": [1, 2, 3, 4, 5],
+    "settings": {
+      "debug": true,
+      "timeout": 30,
+      "retries": 3
+    }
+  }
+}
