@@ -26,6 +26,3 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     };
   }
 };
-
-// 後方互換性のため、個別関数もエクスポート
-export { uploadTextFile, getTextFile, listFiles, deleteFile } from './s3-operations';
