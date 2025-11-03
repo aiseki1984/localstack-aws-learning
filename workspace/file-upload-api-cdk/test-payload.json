@@ -1,8 +1,0 @@
-{
-  "httpMethod": "POST",
-  "path": "/upload",
-  "body": "{\"filename\": \"test.txt\", \"content\": \"SGVsbG8gV29ybGQ=\"}",
-  "headers": {
-    "Content-Type": "application/json"
-  }
-}
