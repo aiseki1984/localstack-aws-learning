@@ -6,9 +6,15 @@
 
 AWS CLI を使用して Lambda 関数と DynamoDB を手動で構築・連携させる学習プロジェクトです。LocalStack 環境を使用することで、実際の AWS 環境を使わずに安全に学習できます。
 
-## 操作
+## lambda
 
+```sh
+cd lambda/
 ```
+
+### 操作
+
+```sh
 npm install -D vitest
 npm install @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb
 ```
