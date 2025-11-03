@@ -1,19 +1,37 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
-  DynamoDBDocumentClient,
+  DynamoDBClient,
   CreateTableCommand,
   DeleteTableCommand,
-} from '@aws-sdk/lib-dynamodb';
+} from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { putUser, getUser } from './index';
 
-// LocalStack用の設定
+// テスト用の環境変数設定
+const testEnv = {
+  AWS_ACCESS_KEY_ID: 'test',
+  AWS_SECRET_ACCESS_KEY: 'test',
+  AWS_REGION: 'us-east-1',
+  TABLE_NAME: 'test-users',
+  LOCALSTACK_HOSTNAME: 'localhost',
+};
+
+// 環境変数を設定
+Object.assign(process.env, testEnv);
+
+// LocalStackエンドポイントを取得（Docker環境では localstack、開発環境では localhost）
+const LOCALSTACK_ENDPOINT =
+  process.env.AWS_ENDPOINT_URL || 'http://localhost:4566';
+
+console.log('Integration test endpoint:', LOCALSTACK_ENDPOINT);
+
+// LocalStack用のDynamoDBクライアント設定
 const client = new DynamoDBClient({
-  region: 'us-east-1',
-  endpoint: 'http://localhost:4566',
+  region: testEnv.AWS_REGION,
+  endpoint: LOCALSTACK_ENDPOINT,
   credentials: {
-    accessKeyId: 'test',
-    secretAccessKey: 'test',
+    accessKeyId: testEnv.AWS_ACCESS_KEY_ID,
+    secretAccessKey: testEnv.AWS_SECRET_ACCESS_KEY,
   },
 });
 
@@ -23,6 +41,10 @@ describe('DynamoDB Integration Tests', () => {
   const tableName = 'test-users';
 
   beforeAll(async () => {
+    console.log('Setting up integration tests...');
+    console.log('Endpoint:', LOCALSTACK_ENDPOINT);
+    console.log('Table:', tableName);
+
     // テスト用テーブルの作成
     try {
       await client.send(
@@ -33,18 +55,18 @@ describe('DynamoDB Integration Tests', () => {
           BillingMode: 'PAY_PER_REQUEST',
         })
       );
+      console.log('✅ Test table created successfully');
 
       // テーブル作成の待機
       await new Promise((resolve) => setTimeout(resolve, 2000));
-    } catch (error) {
-      // テーブルが既に存在する場合は無視
-      console.log('Table might already exist:', error);
+    } catch (error: any) {
+      if (error.name === 'ResourceInUseException') {
+        console.log('✅ Test table already exists');
+      } else {
+        console.error('❌ Failed to create test table:', error);
+        throw error;
+      }
     }
-
-    // 環境変数設定
-    process.env.TABLE_NAME = tableName;
-    process.env.AWS_REGION = 'us-east-1';
-    process.env.LOCALSTACK_HOSTNAME = 'localhost';
   });
 
   it('should put and get a user from DynamoDB', async () => {

@@ -14,6 +14,9 @@ cd lambda/
 
 ### 操作
 
+- テスト、dynamodb などのライブラリをインストール
+- テストファイルを作成
+
 ```sh
 npm install -D vitest
 npm install @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb
