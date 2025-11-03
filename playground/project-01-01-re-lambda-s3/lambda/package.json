@@ -5,10 +5,9 @@
   "scripts": {
     "build": "esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js",
     "build:watch": "npm run build -- --watch",
-    "test": "vitest",
+    "test": "vitest run",
     "test:watch": "vitest --watch",
-    "test:lambda": "tsx src/test-lambda.ts",
-    "dev": "tsx --watch src/test-lambda.ts"
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
