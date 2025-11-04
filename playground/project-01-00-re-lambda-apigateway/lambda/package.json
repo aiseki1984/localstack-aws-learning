@@ -4,9 +4,7 @@
   "description": "Lambda TypeScript + API Gateway CRUD API for posts",
   "main": "dist/index.js",
   "scripts": {
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:watch": "vitest --watch",
+    "test": "vitest run",
     "dev": "tsc -w",
     "build": "esbuild src/index.ts --bundle --minify --platform=node --target=es2020 --outfile=dist/index.js --external:@aws-sdk/*",
     "typecheck": "tsc --noEmit",
