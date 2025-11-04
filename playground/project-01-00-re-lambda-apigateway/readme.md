@@ -236,7 +236,95 @@ npm run cleanup
 2. **統合テスト**: Lambda ハンドラーの動作確認
 3. **E2E テスト**: API Gateway 経由の実際の HTTP テスト
 
-## 📚 学習ポイント
+## �️ 手動デプロイの流れ（学習用）
+
+このプロジェクトでは **手動でのAWSリソース構築** を学習できます。
+以下の手順で Lambda + API Gateway を一つ一つ構築していきます：
+
+### 📋 手動デプロイの全手順
+
+1. **IAMロール作成** 
+   ```bash
+   aws iam create-role --role-name lambda-api-execution-role
+   ```
+
+2. **Lambda関数作成**
+   ```bash
+   # TypeScript ビルド
+   npm run build
+   
+   # ZIPパッケージ作成  
+   zip -r function.zip dist/
+   
+   # Lambda関数デプロイ
+   aws lambda create-function --function-name posts-api-lambda
+   ```
+
+3. **API Gateway作成**
+   ```bash
+   # REST API作成
+   aws apigateway create-rest-api --name posts-api
+   
+   # ルートリソースID取得
+   aws apigateway get-resources
+   ```
+
+4. **リソース階層構築**
+   ```bash
+   # /posts リソース作成
+   aws apigateway create-resource --path-part "posts"
+   
+   # /posts/{id} リソース作成  
+   aws apigateway create-resource --path-part "{id}"
+   ```
+
+5. **メソッドと統合設定**（各リソース×各HTTPメソッド）
+   ```bash
+   # HTTPメソッド作成（GET, POST, PUT, DELETE, OPTIONS）
+   aws apigateway put-method --http-method GET
+   
+   # Lambda統合設定  
+   aws apigateway put-integration --type AWS_PROXY
+   ```
+
+6. **デプロイメント**
+   ```bash
+   # ステージ作成・デプロイ
+   aws apigateway create-deployment --stage-name dev
+   ```
+
+7. **権限設定**
+   ```bash
+   # API GatewayからLambda呼び出し権限付与
+   aws lambda add-permission --principal apigateway.amazonaws.com
+   ```
+
+### 📊 手動 vs IaC の比較
+
+| 手動デプロイ | CDK/CloudFormation |
+|-------------|-------------------|
+| **7つの主要ステップ** | **1つのコマンド** |
+| **20+ AWS CLI コマンド** | **数行のコード** |
+| **リソースID管理が必要** | **自動管理** |
+| **手順の順序が重要** | **依存関係自動解決** |
+| **削除時も手動手順** | **一括削除可能** |
+| **設定ミスしやすい** | **型チェック・バリデーション** |
+
+**手動デプロイの価値**: 
+- ✅ AWS サービス間の関係性を深く理解
+- ✅ API Gateway の内部構造を学習  
+- ✅ 権限モデルの詳細把握
+- ✅ トラブルシューティング力向上
+
+**IaC の価値**:
+- ✅ 素早いデプロイ・削除
+- ✅ 再現性・一貫性
+- ✅ バージョン管理
+- ✅ チーム開発効率
+
+> 💡 **学習のおすすめ**: まず手動で理解 → CDK/CloudFormation で効率化
+
+## �📚 学習ポイント
 
 このプロジェクトで学習できる内容：
 
@@ -246,14 +334,132 @@ npm run cleanup
 4. **テスト駆動開発**: 包括的なテストスイート作成
 5. **自動化**: デプロイ・クリーンアップスクリプト
 6. **LocalStack**: AWS サービスのローカル開発環境
+7. **手動構築**: AWS CLI による詳細なリソース管理
 
-## 🔄 次のステップ
+## � API Gateway v2 への移行
 
-1. **データ永続化**: DynamoDB 統合
-2. **認証・認可**: JWT トークン認証
-3. **バリデーション強化**: Joi/Zod スキーマ
-4. **ログ機能**: CloudWatch Logs 統合
-5. **パフォーマンス**: Cold Start 最適化
+現在のプロジェクトは **API Gateway v1 (REST API)** を使用していますが、**v2 (HTTP API)** への移行も検討できます。
+
+### 📊 v1 vs v2 比較
+
+| 項目 | API Gateway v1 (REST API) | API Gateway v2 (HTTP API) |
+|------|---------------------------|---------------------------|
+| **パフォーマンス** | 標準 | **最大70%高速** |
+| **コスト** | 標準 | **最大70%削減** |
+| **設定の複雑さ** | 複雑（詳細設定可能） | **シンプル** |
+| **CORS設定** | 手動設定が必要 | **自動設定オプション** |
+| **JWT認証** | カスタム実装 | **ネイティブサポート** |
+| **WebSocket** | 別サービス (API Gateway v1 WebSocket) | **統合サポート** |
+
+### 🔧 TypeScriptコードの変更点
+
+#### **型定義の変更**
+```typescript
+// v1 (現在)
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+
+// v2 (変更後)
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+```
+
+#### **イベントオブジェクトの違い**
+```typescript
+// v1 (現在)
+const method = event.httpMethod;        // "GET"
+const path = event.path;                // "/posts"
+
+// v2 (変更後) 
+const method = event.requestContext.http.method;  // "GET"
+const path = event.rawPath;                       // "/posts"
+```
+
+### 🛠️ デプロイスクリプトの変更
+
+```bash
+# v1 (現在)
+aws apigateway create-rest-api --name posts-api
+
+# v2 (変更後)
+aws apigatewayv2 create-api \
+  --name posts-api \
+  --protocol-type HTTP \
+  --cors-configuration AllowOrigins="*"
+```
+
+### ⚠️ 移行時の注意点・躓きやすいポイント
+
+#### 1. **イベント構造の違い**
+```typescript
+// ❌ v2でこれは動かない
+const method = event.httpMethod;  // undefined になる
+
+// ✅ v2ではこう書く
+const method = event.requestContext.http.method;
+```
+
+#### 2. **クエリパラメータの扱い**
+```typescript
+// v1: null の場合がある
+const params = event.queryStringParameters || {};
+
+// v2: undefined の場合がある  
+const params = event.queryStringParameters || {};
+```
+
+#### 3. **CORS設定の場所**
+- **v1**: Lambda関数内でヘッダー設定が必要
+- **v2**: API Gateway レベルで設定可能（簡単）
+
+#### 4. **エラーレスポンス形式**
+```typescript
+// v1/v2 共通だが、細かい違いに注意
+return {
+  statusCode: 200,
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(data)
+};
+```
+
+### 🎯 移行の判断基準
+
+#### **v1 を継続する場合**
+- ✅ 既存システムとの互換性重視
+- ✅ 詳細なカスタマイズが必要
+- ✅ リクエスト/レスポンス変換が必要
+- ✅ 学習・理解目的（より多くの概念を学べる）
+
+#### **v2 に移行する場合**  
+- ✅ 新規プロジェクト
+- ✅ コスト・パフォーマンス重視
+- ✅ シンプルなREST API
+- ✅ JWT認証を使いたい
+- ✅ 開発・運用効率を優先
+
+### 💡 移行のステップ
+
+1. **TypeScript型定義更新**: `APIGatewayProxyEventV2` に変更
+2. **イベントアクセス修正**: `event.requestContext.http.method` 等
+3. **デプロイスクリプト更新**: `apigatewayv2` CLI使用
+4. **テスト更新**: 新しいイベント形式でテスト
+5. **段階的移行**: 一つずつエンドポイントを移行
+
+### 📁 サンプルファイル
+
+プロジェクト内の `lambda/src/index-v2.example.ts` に **v2対応版のサンプルコード** があります。
+
+> 💭 **学習のおすすめ**: 
+> 1. まずv1で基本概念を理解 
+> 2. v2の利点と違いを把握
+> 3. 実際のプロジェクトでv2を採用検討
+
+## �🔄 次のステップ
+
+1. **API Gateway v2移行**: より高速・低コストなアーキテクチャ
+2. **データ永続化**: DynamoDB 統合
+3. **認証・認可**: JWT トークン認証（v2なら簡単）
+4. **バリデーション強化**: Joi/Zod スキーマ
+5. **ログ機能**: CloudWatch Logs 統合
+6. **パフォーマンス**: Cold Start 最適化
 
 ## 🐛 トラブルシューティング
 
