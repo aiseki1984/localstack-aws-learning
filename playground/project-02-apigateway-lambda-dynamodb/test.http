@@ -11,7 +11,7 @@
 # ==========================================
 
 # 設定変数
-@api_id = klm7xhp0fr
+@api_id = jw2wtnrqtm
 @stage = dev
 @base_url = http://localstack:4566/restapis/{{api_id}}/{{stage}}/_user_request_
 

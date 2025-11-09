@@ -1,22 +1,23 @@
-# Lambda TypeScript + API Gateway プロジェクト
+# Lambda TypeScript + API Gateway + DynamoDB プロジェクト
 
-AWS Lambda(TypeScript) + API Gateway を使った学習用 REST API プロジェクトです。
+AWS Lambda(TypeScript) + API Gateway + DynamoDB を使った学習用 REST API プロジェクトです。
 記事投稿システムの CRUD API を実装し、LocalStack 環境でのテスト・デプロイ方法を学習できます。
 
 ## 📋 プロジェクト概要
 
-- **目的**: Lambda + API Gateway + TypeScript の学習
+- **目的**: Lambda + API Gateway + DynamoDB + TypeScript の学習
 - **機能**: 記事（Post）の CRUD 操作
-- **データ**: インメモリ（ダミーデータ）
+- **データ**: DynamoDB（永続化ストレージ）
 - **環境**: LocalStack（AWS サービスエミュレーション）
-- **テスト**: Vitest を使った包括的なテスト
+- **テスト**: Vitest を使った包括的なテスト（モック化対応）
 - **ビルド**: esbuild による高速ビルド
 
 ## 🏗️ プロジェクト構造
 
 ```
-project-01-00-re-lambda-apigateway/
+project-02-apigateway-lambda-dynamodb/
 ├── readme.md                     # プロジェクトドキュメント
+├── test.http                     # HTTP APIテスト用ファイル
 ├── lambda/                       # Lambda関数
 │   ├── package.json              # 依存関係とスクリプト
 │   ├── tsconfig.json             # TypeScript設定
@@ -24,11 +25,13 @@ project-01-00-re-lambda-apigateway/
 │   └── src/
 │       ├── index.ts              # メインハンドラー
 │       ├── index.test.ts         # ハンドラーのテスト
-│       ├── posts-service.ts      # ビジネスロジック
+│       ├── posts-service.ts      # ビジネスロジック（DynamoDB統合）
+│       ├── dynamodb-client.ts    # DynamoDBクライアント設定
 │       └── types.ts              # 型定義
 └── scripts/
     ├── deploy.sh                 # デプロイスクリプト
-    └── cleanup.sh                # リソース削除スクリプト
+    ├── cleanup.sh                # リソース削除スクリプト
+    └── list-resources.sh         # リソース一覧表示
 ```
 
 ## 🚀 API エンドポイント
@@ -130,7 +133,61 @@ npm run test:run
 - ✅ CORS 対応の確認
 - ✅ フィルタリング・ページネーション
 
-## 🚀 デプロイメント
+## �️ DynamoDB統合
+
+このプロジェクトでは、データの永続化にDynamoDBを使用しています。
+
+### テーブル構造
+
+**テーブル名**: `posts-table`
+
+| 属性名 | 型 | 説明 |
+|--------|----|----|
+| `id` (PK) | String | 投稿ID（UUID） |
+| `title` | String | 記事タイトル |
+| `content` | String | 記事本文 |
+| `author` | String | 作成者 |
+| `createdAt` | String | 作成日時（ISO 8601） |
+| `updatedAt` | String | 更新日時（ISO 8601） |
+| `tags` | List<String> | タグ配列 |
+| `status` | String | ステータス（draft/published/archived） |
+
+### AWS SDK v3の使用
+
+- **@aws-sdk/client-dynamodb**: DynamoDBの低レベルAPI
+- **@aws-sdk/lib-dynamodb**: DocumentClient（高レベルAPI）
+
+```typescript
+// DynamoDBクライアントの初期化例
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+
+const client = DynamoDBDocumentClient.from(new DynamoDBClient({
+  region: 'us-east-1',
+  endpoint: process.env.AWS_ENDPOINT_URL, // LocalStack対応
+}));
+
+// データの保存
+await client.send(new PutCommand({
+  TableName: 'posts-table',
+  Item: { id: '1', title: 'Test', ... }
+}));
+```
+
+### LocalStack対応
+
+環境変数 `AWS_ENDPOINT_URL` を使用してLocalStackに接続します：
+
+```typescript
+// lambda/src/dynamodb-client.ts
+const endpoint = process.env.AWS_ENDPOINT_URL;
+const client = new DynamoDBClient({
+  region: process.env.AWS_REGION || 'us-east-1',
+  ...(endpoint && { endpoint, forcePathStyle: true }),
+});
+```
+
+## �🚀 デプロイメント
 
 ### LocalStack へのデプロイ
 
@@ -144,9 +201,19 @@ export AWS_ENDPOINT_URL=http://localstack:4566
 
 デプロイされるリソース：
 
-- Lambda 関数: `posts-api-lambda`
-- IAM ロール: `lambda-api-execution-role`
-- API Gateway: `posts-api`
+- **DynamoDB テーブル**: `posts-table`
+- **Lambda 関数**: `posts-api-lambda`
+- **IAM ロール**: `lambda-api-execution-role`
+- **API Gateway**: `posts-api`
+
+デプロイスクリプトは以下の順序で実行されます：
+
+1. DynamoDBテーブル作成（キー: `id`）
+2. IAMロール作成
+3. TypeScriptビルド
+4. Lambda関数デプロイ（環境変数: `TABLE_NAME`, `AWS_ENDPOINT_URL`）
+5. API Gateway設定（リソース、メソッド、統合）
+6. ステージデプロイ
 
 ### API テスト
 
@@ -217,9 +284,16 @@ npm run cleanup
 - リクエスト・レスポンスの型チェック
 - エラーハンドリングの型安全性
 
+### DynamoDB統合
+
+- **AWS SDK v3**: 最新のモジュラーSDK
+- **DocumentClient**: 高レベルAPIで簡単なデータ操作
+- **UUID**: 衝突のないID生成
+- **FilterExpression**: 柔軟なクエリフィルタリング
+
 ### モダンな開発環境
 
-- **esbuild**: 高速ビルド・バンドル
+- **esbuild**: 高速ビルド・バンドル（AWS SDKは外部化）
 - **Vitest**: 高速テスト実行・ホットリロード
 - **TypeScript**: 型安全性・開発効率
 
@@ -229,12 +303,13 @@ npm run cleanup
 - 包括的エラーハンドリング
 - 構造化ログ出力
 - Lambda 最適化（バンドルサイズ最小化）
+- データ永続化（DynamoDB）
 
 ### テスト戦略
 
-1. **単体テスト**: ビジネスロジックの詳細テスト
-2. **統合テスト**: Lambda ハンドラーの動作確認
-3. **E2E テスト**: API Gateway 経由の実際の HTTP テスト
+1. **単体テスト**: DynamoDBクライアントをモック化してビジネスロジックをテスト
+2. **統合テスト**: Lambda ハンドラーの動作確認（PostsServiceをモック注入）
+3. **E2E テスト**: 実際のLocalStack環境でAPI動作確認
 
 ## �️ 手動デプロイの流れ（学習用）
 
@@ -324,17 +399,26 @@ npm run cleanup
 
 > 💡 **学習のおすすめ**: まず手動で理解 → CDK/CloudFormation で効率化
 
-## �📚 学習ポイント
+## 📚 学習ポイント
 
 このプロジェクトで学習できる内容：
 
 1. **Lambda 関数の基本構造**: ハンドラー、コンテキスト、レスポンス形式
 2. **API Gateway 統合**: プロキシ統合、ルーティング、CORS
-3. **TypeScript 活用**: 型安全な API 開発
-4. **テスト駆動開発**: 包括的なテストスイート作成
-5. **自動化**: デプロイ・クリーンアップスクリプト
-6. **LocalStack**: AWS サービスのローカル開発環境
-7. **手動構築**: AWS CLI による詳細なリソース管理
+3. **DynamoDB 操作**: AWS SDK v3による CRUD 操作
+4. **TypeScript 活用**: 型安全な API 開発
+5. **テスト駆動開発**: モック化を含む包括的なテストスイート作成
+6. **自動化**: デプロイ・クリーンアップスクリプト
+7. **LocalStack**: AWS サービスのローカル開発環境
+8. **手動構築**: AWS CLI による詳細なリソース管理
+
+### DynamoDB学習のポイント
+
+- **DocumentClient vs 低レベルAPI**: 使いやすい高レベルAPIの活用
+- **Scan vs Query**: データ取得パターンの違いと使い分け
+- **FilterExpression**: 柔軟なフィルタリング条件の記述
+- **UpdateExpression**: 部分更新の効率的な実装
+- **エラーハンドリング**: DynamoDB特有のエラー処理
 
 ## � API Gateway v2 への移行
 
@@ -452,14 +536,16 @@ return {
 > 2. v2の利点と違いを把握
 > 3. 実際のプロジェクトでv2を採用検討
 
-## �🔄 次のステップ
+## 🔄 次のステップ
 
-1. **API Gateway v2移行**: より高速・低コストなアーキテクチャ
-2. **データ永続化**: DynamoDB 統合
-3. **認証・認可**: JWT トークン認証（v2なら簡単）
-4. **バリデーション強化**: Joi/Zod スキーマ
-5. **ログ機能**: CloudWatch Logs 統合
-6. **パフォーマンス**: Cold Start 最適化
+1. **GSI（グローバルセカンダリインデックス）**: `author` や `status` でのクエリ最適化
+2. **ページネーション改善**: `LastEvaluatedKey` を使った真のDynamoDBページング
+3. **API Gateway v2移行**: より高速・低コストなアーキテクチャ
+4. **認証・認可**: JWT トークン認証、Cognito統合
+5. **バリデーション強化**: Joi/Zod スキーマによる厳密な入力検証
+6. **ログ機能**: CloudWatch Logs統合、構造化ログ
+7. **パフォーマンス**: Lambda Cold Start最適化、DynamoDBキャパシティ調整
+8. **監視・アラート**: CloudWatch メトリクス、X-Ray トレーシング
 
 ## 🐛 トラブルシューティング
 
@@ -488,6 +574,35 @@ npm install
 ```bash
 # Lambda関数の状態確認
 aws lambda get-function --function-name posts-api-lambda \
+  --endpoint-url=$AWS_ENDPOINT_URL --region us-east-1
+```
+
+**Q: DynamoDBにデータが保存されない**
+
+```bash
+# テーブルの存在確認
+aws dynamodb list-tables \
+  --endpoint-url=$AWS_ENDPOINT_URL --region us-east-1
+
+# テーブル内容の確認
+aws dynamodb scan --table-name posts-table \
+  --endpoint-url=$AWS_ENDPOINT_URL --region us-east-1
+
+# Lambda関数の環境変数確認
+aws lambda get-function-configuration \
+  --function-name posts-api-lambda \
+  --endpoint-url=$AWS_ENDPOINT_URL --region us-east-1 \
+  --query 'Environment.Variables'
+```
+
+**Q: Lambda関数でDynamoDBエラーが発生する**
+
+```bash
+# CloudWatch Logsを確認（LocalStackの場合はコンテナログ）
+docker logs localstack
+
+# Lambda関数の実行ログを確認
+aws logs tail /aws/lambda/posts-api-lambda --follow \
   --endpoint-url=$AWS_ENDPOINT_URL --region us-east-1
 ```
 

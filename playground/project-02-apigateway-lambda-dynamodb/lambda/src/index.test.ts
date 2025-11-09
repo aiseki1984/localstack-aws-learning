@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { handler } from './index';
+import { handler, setPostsService, resetPostsService } from './index';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+import { PostsService } from './posts-service';
+import { Post } from './types';
+
+// DynamoDBクライアントのモック
+vi.mock('./dynamodb-client', () => ({
+  createDynamoDBClient: vi.fn(() => ({})),
+  getTableName: vi.fn(() => 'posts-table-test'),
+}));
 
 // テスト用のヘルパー関数
 const createMockEvent = (
@@ -40,21 +48,61 @@ const createMockContext = (): Context => ({
   callbackWaitsForEmptyEventLoop: true,
 });
 
+// テスト用のモックデータ
+const mockPost: Post = {
+  id: '1',
+  title: 'Test Post',
+  content: 'Test Content',
+  author: 'Test Author',
+  createdAt: '2024-01-15T10:00:00Z',
+  updatedAt: '2024-01-15T10:00:00Z',
+  tags: ['test'],
+  status: 'published',
+};
+
 describe('Posts API Lambda Handler', () => {
   let mockContext: Context;
+  let mockPostsService: any;
 
   beforeEach(() => {
     mockContext = createMockContext();
     vi.clearAllMocks();
+
+    // PostsServiceをリセット
+    resetPostsService();
+
+    // PostsServiceのインスタンスをモック化
+    mockPostsService = {
+      getPosts: vi.fn(),
+      getPostById: vi.fn(),
+      createPost: vi.fn(),
+      updatePost: vi.fn(),
+      deletePost: vi.fn(),
+    } as any;
+
+    // モックサービスを設定
+    setPostsService(mockPostsService);
   });
 
   describe('GET /posts', () => {
     it('should return list of posts', async () => {
-      const event = createMockEvent('GET', '/posts');
+      const mockResponse = {
+        posts: [mockPost],
+        pagination: {
+          limit: 10,
+          offset: 0,
+          total: 1,
+          hasMore: false,
+        },
+      };
 
+      mockPostsService.getPosts.mockResolvedValue(mockResponse);
+
+      const event = createMockEvent('GET', '/posts');
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(200);
+      expect(mockPostsService.getPosts).toHaveBeenCalled();
 
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
@@ -64,27 +112,49 @@ describe('Posts API Lambda Handler', () => {
     });
 
     it('should filter posts by status', async () => {
+      const mockResponse = {
+        posts: [mockPost],
+        pagination: {
+          limit: 10,
+          offset: 0,
+          total: 1,
+          hasMore: false,
+        },
+      };
+
+      mockPostsService.getPosts.mockResolvedValue(mockResponse);
+
       const event = createMockEvent('GET', '/posts', undefined, undefined, {
         status: 'published',
       });
-
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(200);
+      expect(mockPostsService.getPosts).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'published' })
+      );
 
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
-      body.data.posts.forEach((post: any) => {
-        expect(post.status).toBe('published');
-      });
     });
 
     it('should support pagination', async () => {
+      const mockResponse = {
+        posts: [mockPost],
+        pagination: {
+          limit: 1,
+          offset: 0,
+          total: 1,
+          hasMore: false,
+        },
+      };
+
+      mockPostsService.getPosts.mockResolvedValue(mockResponse);
+
       const event = createMockEvent('GET', '/posts', undefined, undefined, {
         limit: '1',
         offset: '0',
       });
-
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(200);
@@ -98,11 +168,13 @@ describe('Posts API Lambda Handler', () => {
 
   describe('GET /posts/{id}', () => {
     it('should return a specific post', async () => {
-      const event = createMockEvent('GET', '/posts/1', undefined, { id: '1' });
+      mockPostsService.getPostById.mockResolvedValue(mockPost);
 
+      const event = createMockEvent('GET', '/posts/1', undefined, { id: '1' });
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(200);
+      expect(mockPostsService.getPostById).toHaveBeenCalledWith('1');
 
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
@@ -111,10 +183,11 @@ describe('Posts API Lambda Handler', () => {
     });
 
     it('should return 404 for non-existent post', async () => {
+      mockPostsService.getPostById.mockResolvedValue(null);
+
       const event = createMockEvent('GET', '/posts/999', undefined, {
         id: '999',
       });
-
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(404);
@@ -132,14 +205,22 @@ describe('Posts API Lambda Handler', () => {
         content: 'This is a test post content',
         author: 'Test Author',
         tags: ['test'],
-        status: 'draft',
+        status: 'draft' as const,
       };
 
-      const event = createMockEvent('POST', '/posts', JSON.stringify(newPost));
+      const createdPost: Post = {
+        ...mockPost,
+        ...newPost,
+        id: '2',
+      };
 
+      mockPostsService.createPost.mockResolvedValue(createdPost);
+
+      const event = createMockEvent('POST', '/posts', JSON.stringify(newPost));
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(201);
+      expect(mockPostsService.createPost).toHaveBeenCalled();
 
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
@@ -190,16 +271,24 @@ describe('Posts API Lambda Handler', () => {
         content: 'Updated content',
       };
 
+      const updatedPost: Post = {
+        ...mockPost,
+        ...updateData,
+        updatedAt: '2024-01-16T10:00:00Z',
+      };
+
+      mockPostsService.updatePost.mockResolvedValue(updatedPost);
+
       const event = createMockEvent(
         'PUT',
         '/posts/1',
         JSON.stringify(updateData),
         { id: '1' }
       );
-
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(200);
+      expect(mockPostsService.updatePost).toHaveBeenCalledWith('1', updateData);
 
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
@@ -211,13 +300,14 @@ describe('Posts API Lambda Handler', () => {
     it('should return 404 for non-existent post', async () => {
       const updateData = { title: 'Updated Title' };
 
+      mockPostsService.updatePost.mockResolvedValue(null);
+
       const event = createMockEvent(
         'PUT',
         '/posts/999',
         JSON.stringify(updateData),
         { id: '999' }
       );
-
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(404);
@@ -230,13 +320,15 @@ describe('Posts API Lambda Handler', () => {
 
   describe('DELETE /posts/{id}', () => {
     it('should delete an existing post', async () => {
+      mockPostsService.deletePost.mockResolvedValue(true);
+
       const event = createMockEvent('DELETE', '/posts/1', undefined, {
         id: '1',
       });
-
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(200);
+      expect(mockPostsService.deletePost).toHaveBeenCalledWith('1');
 
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
@@ -245,10 +337,11 @@ describe('Posts API Lambda Handler', () => {
     });
 
     it('should return 404 for non-existent post', async () => {
+      mockPostsService.deletePost.mockResolvedValue(false);
+
       const event = createMockEvent('DELETE', '/posts/999', undefined, {
         id: '999',
       });
-
       const response = await handler(event, mockContext);
 
       expect(response.statusCode).toBe(404);

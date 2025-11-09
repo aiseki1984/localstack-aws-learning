@@ -21,15 +21,24 @@ fi
 FUNCTION_NAME="posts-api-lambda"
 ROLE_NAME="lambda-api-execution-role"
 API_NAME="posts-api"
+TABLE_NAME="posts-table"
 
-echo "🧹 Lambda + API Gateway クリーンアップ開始"
+echo "🧹 Lambda + API Gateway + DynamoDB クリーンアップ開始"
 echo "📋 削除対象:"
 echo "   Function: $FUNCTION_NAME"
 echo "   Role: $ROLE_NAME"
 echo "   API: $API_NAME"
+echo "   Table: $TABLE_NAME"
 echo "   Endpoint: $AWS_ENDPOINT_URL"
 
-# 1. API Gatewayの削除
+# 1. DynamoDBテーブルの削除
+echo "🗄️  DynamoDBテーブルを削除中..."
+aws dynamodb delete-table \
+  --table-name $TABLE_NAME \
+  --endpoint-url=$AWS_ENDPOINT_URL \
+  --region $AWS_REGION 2>/dev/null || echo "テーブルが見つかりません（既に削除済み）"
+
+# 2. API Gatewayの削除
 echo "🌐 API Gatewayを削除中..."
 API_ID=$(aws apigateway get-rest-apis \
   --endpoint-url=$AWS_ENDPOINT_URL \
@@ -47,21 +56,21 @@ else
   echo "   ⚠️ API Gatewayが見つかりません（既に削除済み）"
 fi
 
-# 2. Lambda関数の削除
+# 3. Lambda関数の削除
 echo "⚡ Lambda関数を削除中..."
 aws lambda delete-function \
   --function-name $FUNCTION_NAME \
   --endpoint-url=$AWS_ENDPOINT_URL \
   --region $AWS_REGION || echo "Lambda関数が見つかりません（既に削除済み）"
 
-# 3. IAMロールの削除
+# 4. IAMロールの削除
 echo "🔐 IAMロールを削除中..."
 aws iam delete-role \
   --role-name $ROLE_NAME \
   --endpoint-url=$AWS_ENDPOINT_URL \
   --region $AWS_REGION || echo "IAMロールが見つかりません（既に削除済み）"
 
-# 4. ローカルファイルの削除
+# 5. ローカルファイルの削除
 echo "📁 一時ファイルを削除中..."
 cd lambda/ 2>/dev/null || cd ./
 rm -f function.zip
@@ -70,6 +79,7 @@ rm -rf dist/
 echo "✅ クリーンアップ完了!"
 echo ""
 echo "📋 削除されたリソース:"
+echo "   ✓ DynamoDBテーブル: $TABLE_NAME"
 echo "   ✓ Lambda関数: $FUNCTION_NAME"
 echo "   ✓ API Gateway: $API_NAME"
 echo "   ✓ IAMロール: $ROLE_NAME"

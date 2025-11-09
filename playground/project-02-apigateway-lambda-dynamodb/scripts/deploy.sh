@@ -21,18 +21,36 @@ fi
 FUNCTION_NAME="posts-api-lambda"
 ROLE_NAME="lambda-api-execution-role"
 API_NAME="posts-api"
+TABLE_NAME="posts-table"
 RUNTIME="nodejs20.x"
 HANDLER="index.handler"
 
-echo "🚀 Lambda + API Gateway デプロイメント開始"
+echo "🚀 Lambda + API Gateway + DynamoDB デプロイメント開始"
 echo "📋 設定:"
 echo "   Function: $FUNCTION_NAME"
 echo "   API: $API_NAME"
+echo "   Table: $TABLE_NAME"
 echo "   Runtime: $RUNTIME"
 echo "   Region: $AWS_REGION"
 echo "   Endpoint: $AWS_ENDPOINT_URL"
 
-# 1. IAMロールの作成
+# 1. DynamoDBテーブルの作成
+echo "🗄️  DynamoDBテーブルを作成中..."
+aws dynamodb create-table \
+  --table-name $TABLE_NAME \
+  --attribute-definitions \
+      AttributeName=id,AttributeType=S \
+  --key-schema \
+      AttributeName=id,KeyType=HASH \
+  --provisioned-throughput \
+      ReadCapacityUnits=5,WriteCapacityUnits=5 \
+  --endpoint-url=$AWS_ENDPOINT_URL \
+  --region $AWS_REGION 2>/dev/null || echo "テーブルは既に存在します"
+
+echo "⏳ テーブルの準備完了を待機中..."
+sleep 2
+
+# 2. IAMロールの作成
 echo "🔐 IAMロールを作成中..."
 aws iam create-role \
   --role-name $ROLE_NAME \
@@ -91,6 +109,7 @@ aws lambda create-function \
   --zip-file fileb://lambda/function.zip \
   --timeout 30 \
   --memory-size 256 \
+  --environment "Variables={TABLE_NAME=$TABLE_NAME,AWS_ENDPOINT_URL=$AWS_ENDPOINT_URL}" \
   --endpoint-url=$AWS_ENDPOINT_URL \
   --region $AWS_REGION
 
@@ -230,6 +249,7 @@ aws lambda add-permission \
 echo "✅ デプロイメント完了!"
 echo ""
 echo "📋 デプロイされたリソース:"
+echo "   ✓ DynamoDB テーブル: $TABLE_NAME"
 echo "   ✓ Lambda関数: $FUNCTION_NAME"
 echo "   ✓ IAMロール: $ROLE_NAME"
 echo "   ✓ API Gateway: $API_NAME (ID: $API_ID)"

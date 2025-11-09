@@ -80,8 +80,25 @@ const parseQueryParameters = (event: APIGatewayProxyEvent): GetPostsQuery => {
   };
 };
 
-// Posts service instance
-const postsService = new PostsService();
+// Posts service instance (テスト用に外部から注入可能にする)
+let postsServiceInstance: PostsService | null = null;
+
+const getPostsService = (): PostsService => {
+  if (!postsServiceInstance) {
+    postsServiceInstance = new PostsService();
+  }
+  return postsServiceInstance;
+};
+
+// テスト用: PostsServiceインスタンスを設定
+export const setPostsService = (service: PostsService): void => {
+  postsServiceInstance = service;
+};
+
+// テスト用: PostsServiceインスタンスをリセット
+export const resetPostsService = (): void => {
+  postsServiceInstance = null;
+};
 
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -90,6 +107,7 @@ export const handler = async (
   try {
     console.log('Event:', JSON.stringify(event, null, 2));
 
+    const postsService = getPostsService();
     const method = event.httpMethod;
     const path = event.path;
     const pathParameters = event.pathParameters || {};
