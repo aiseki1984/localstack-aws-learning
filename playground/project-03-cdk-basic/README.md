@@ -53,15 +53,54 @@ npx cdk synth
 
 ### ステップ 5: デプロイ
 
-スタックをデプロイします：
+#### 方法 A: CDK 標準デプロイ（通常の環境）
 
 ```bash
 npx cdk deploy
 ```
 
-### ステップ 6: 動作確認
+⚠️ **注意**: CDK デプロイには Bootstrap が必要です。初回のみ：
 
-デプロイ後、API エンドポイントが出力されます。curl や HTTP クライアントでテストします。
+```bash
+npx cdk bootstrap
+```
+
+#### 方法 B: CloudFormation 直接デプロイ（devcontainer/LocalStack 環境推奨）
+
+CDK が生成した CloudFormation テンプレートを使って直接デプロイします。この方法では Bootstrap が不要です。
+
+```bash
+# すべて自動実行（Lambda ビルド → S3 アップロード → デプロイ）
+./scripts/deploy.sh
+```
+
+**deploy.sh の処理内容**：
+
+1. Lambda 関数をビルド（esbuild）
+2. Lambda コードを ZIP に圧縮
+3. S3 バケットを作成
+4. Lambda コードを S3 にアップロード
+5. `cdk synth` で CloudFormation テンプレートを生成
+6. テンプレートを修正（Lambda コードパスを S3 に変更、Bootstrap パラメータ削除）
+7. CloudFormation でスタックをデプロイ
+
+### ステップ 6: リソース確認
+
+デプロイされたリソースを確認：
+
+```bash
+./scripts/list-resources.sh
+```
+
+### ステップ 7: API 動作確認
+
+API をテストします：
+
+```bash
+./scripts/test-api.sh
+```
+
+このスクリプトは CRUD 操作（作成、取得、更新、削除）を順番に実行します。
 
 ## API エンドポイント
 
@@ -75,31 +114,80 @@ npx cdk deploy
 
 ## CDK コマンド
 
+### 基本コマンド
+
 - `npm run build` - TypeScript を JavaScript にコンパイル
 - `npm run watch` - 変更を監視して自動コンパイル
 - `npm run test` - Jest ユニットテストを実行
-- `npx cdk deploy` - スタックをデプロイ
+- `npx cdk synth` - CloudFormation テンプレートを生成（`cdk.out/` に出力）
 - `npx cdk diff` - デプロイ済みスタックと現在の差分を表示
-- `npx cdk synth` - CloudFormation テンプレートを生成
+- `npx cdk deploy` - スタックをデプロイ（Bootstrap 必要）
 - `npx cdk destroy` - スタックを削除
 
-## 次のステップ
+### カスタムスクリプト（scripts/ ディレクトリ）
 
-👉 **今ここ**: CDK スタックにリソースを定義していきましょう！
+以下のスクリプトは、どのディレクトリからでも実行可能です：
 
-`lib/project-03-cdk-basic-stack.ts` を編集して、DynamoDB、Lambda、API Gateway を追加します。
+```bash
+# デプロイ（CloudFormation 直接）
+./scripts/deploy.sh
 
-# Welcome to your CDK TypeScript project
+# リソース確認
+./scripts/list-resources.sh
 
-This is a blank project for CDK development with TypeScript.
+# API テスト
+./scripts/test-api.sh
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+# クリーンアップ（スタック削除）
+./scripts/cleanup.sh
+```
 
-## Useful commands
+## CDK vs CloudFormation 直接デプロイの違い
 
-- `npm run build` compile typescript to js
-- `npm run watch` watch for changes and compile
-- `npm run test` perform the jest unit tests
-- `npx cdk deploy` deploy this stack to your default AWS account/region
-- `npx cdk diff` compare deployed stack with current state
-- `npx cdk synth` emits the synthesized CloudFormation template
+### CDK デプロイ（`npx cdk deploy`）
+
+**メリット**：
+
+- CDK の機能をフル活用（アセット管理、自動的な依存関係解決）
+- 本番環境での推奨方法
+
+**必要なもの**：
+
+- CDK Bootstrap（初回のみ `npx cdk bootstrap`）
+- 適切な AWS 認証情報
+
+### CloudFormation 直接デプロイ（`./scripts/deploy.sh`）
+
+**メリット**：
+
+- Bootstrap 不要
+- devcontainer や LocalStack 環境で動作確認が容易
+- デプロイプロセスが可視化されている
+
+**仕組み**：
+
+1. `npx cdk synth` で CloudFormation テンプレート生成
+2. テンプレートを編集（Lambda コードを S3 パスに変更）
+3. `aws cloudformation deploy` で直接デプロイ
+
+**使用例**：
+
+- 学習目的
+- LocalStack でのテスト
+- CDK の内部動作を理解したい場合
+
+## プロジェクトの状態
+
+✅ **完了**：
+
+- CDK スタック定義（DynamoDB + Lambda + API Gateway）
+- Lambda 関数（最小構成）
+- デプロイスクリプト
+- リソース確認スクリプト
+- API テストスクリプト
+
+🔄 **次のステップ（オプション）**：
+
+- Lambda 関数に DynamoDB CRUD 処理を実装
+- エラーハンドリングの改善
+- テストケースの追加
