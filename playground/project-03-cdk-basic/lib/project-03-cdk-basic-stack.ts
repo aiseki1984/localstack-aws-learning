@@ -2,7 +2,6 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as path from 'path';
 
@@ -23,23 +22,14 @@ export class Project03CdkBasicStack extends cdk.Stack {
     });
 
     // ==========================================
-    // Lambda 関数（NodejsFunction で自動ビルド）
+    // Lambda 関数（ビルド済みコードを使用）
     // ==========================================
-    const postsFunction = new lambdaNodejs.NodejsFunction(this, 'PostsFunction', {
-      entry: path.join(__dirname, '../lambda/src/index.ts'), // .ts ファイルを直接指定
-      handler: 'handler',
+    const postsFunction = new lambda.Function(this, 'PostsFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
+      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambda', 'dist')),
+      handler: 'index.handler',
       environment: {
         TABLE_NAME: postsTable.tableName,
-      },
-      timeout: cdk.Duration.seconds(30),
-      bundling: {
-        minify: true,              // コードを圧縮
-        sourceMap: true,           // ソースマップを生成（デバッグ用）
-        externalModules: [         // AWS SDK は Lambda 環境にあるので除外
-          '@aws-sdk/client-dynamodb',
-          '@aws-sdk/lib-dynamodb',
-        ],
       },
     });
 

@@ -138,7 +138,8 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
     apt-get install -y docker-ce-cli && \
     apt-get clean
 
-RUN groupadd docker && \
+# Docker グループを GID 999 で作成（ホストの Docker ソケットのグループと一致させる）
+RUN groupadd -g 999 docker && \
     useradd -u 1000 -g 100 -G sudo,docker -s /bin/bash -m -d /home/ubuntu ubuntu && \
     echo "ubuntu:ubuntu" | chpasswd
 

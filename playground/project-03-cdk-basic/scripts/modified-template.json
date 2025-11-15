@@ -125,8 +125,7 @@
             "Arn"
           ]
         },
-        "Runtime": "nodejs20.x",
-        "Timeout": 30
+        "Runtime": "nodejs20.x"
       },
       "DependsOn": [
         "PostsFunctionServiceRoleDefaultPolicyACA3B729",
@@ -171,7 +170,7 @@
         "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Resource"
       }
     },
-    "PostsApiDeployment7D3D005D4e808f052d59ecdd0ad36aa96da64112": {
+    "PostsApiDeployment7D3D005De67a2f70b7e903e29d94fb529071a1e0": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "Description": "API for managing posts",
@@ -200,7 +199,7 @@
       "Type": "AWS::ApiGateway::Stage",
       "Properties": {
         "DeploymentId": {
-          "Ref": "PostsApiDeployment7D3D005D4e808f052d59ecdd0ad36aa96da64112"
+          "Ref": "PostsApiDeployment7D3D005De67a2f70b7e903e29d94fb529071a1e0"
         },
         "RestApiId": {
           "Ref": "PostsApi3071F4B3"
@@ -333,19 +332,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -377,19 +364,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -414,15 +389,7 @@
             "Fn::Join": [
               "",
               [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":lambda:path/2015-03-31/functions/",
+                "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
                     "PostsFunction3DC4AEDB",
@@ -460,19 +427,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -504,19 +459,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -541,15 +484,7 @@
             "Fn::Join": [
               "",
               [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":lambda:path/2015-03-31/functions/",
+                "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
                     "PostsFunction3DC4AEDB",
@@ -645,19 +580,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -689,19 +612,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -726,15 +637,7 @@
             "Fn::Join": [
               "",
               [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":lambda:path/2015-03-31/functions/",
+                "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
                     "PostsFunction3DC4AEDB",
@@ -772,19 +675,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -816,19 +707,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -853,15 +732,7 @@
             "Fn::Join": [
               "",
               [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":lambda:path/2015-03-31/functions/",
+                "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
                     "PostsFunction3DC4AEDB",
@@ -899,19 +770,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -943,19 +802,7 @@
           "Fn::Join": [
             "",
             [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
+              "arn:aws:execute-api:us-east-1:000000000000:",
               {
                 "Ref": "PostsApi3071F4B3"
               },
@@ -980,15 +827,7 @@
             "Fn::Join": [
               "",
               [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":lambda:path/2015-03-31/functions/",
+                "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
                     "PostsFunction3DC4AEDB",
@@ -1014,12 +853,11 @@
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAA/+1WTW/bMAz9LdWxUL2l3S65pV02FP3KkuwwGEHAWIzDVpY8SW7gGf7vgyQ7SdGtwC4bNvRk6pEiqUeK1mlyOnifvD2CrT3JxMOJpFXSzBxkDxy2dtmIWkGhxSpp5rCSmDasBOPIkVZXWLNhwxQUyIbsmHHm6tKLM9ZytiIpSeU3WnhoMvq6nIyny+n485fxbM44M1joR5ATLSmr2ZAJtM7omrULfrFWIVjLJRQrAUnzsVKZD5k2zFTK0S7iBpSQaLpVFoN5EdUjGa0KVK5PjgrUVVy1vGEgxPjQKA1Wx2wRM+hDenmCpiBrSauWExRJM9WBCrC2KlCcBx5KQyqjEuQoy3S1Cxtt/IZR8NfFZwUoyFGE8xNaNkybJ1g9Mp3tost2rid9iJ61tOm0zkG2uVSSFO504SwvKsNBfWo84oGCfsNce80zP89hIWYOHHoWbZdScBx9ttyeLcFadDYZ+Q+3Z8l5lT2gOweL6YJLndukudb5J6OrMm2Y7MTbvrOiv96i5VBSDg63UCfNFK0bleQ7I0q3+34UaDND5Y52j6yhku5CGzsxuJaUb9xdMLC+hiCl3t4ZysmvY/08dINuo0WE2o62GI1/wFLq2h8+bX4SEErqJIMOSO3N7WEnzvW1zikDeSkOqvo/4oG8PQt85iDHQF0PHZQ8KPkUra5MhqFffNvxWI9Y86Dqx4FzZdR1ACmHuYGDguiDalduow199/PjcHXZ7+6hsH8eh1u4vFDSFdZT/FaRQcGGa5AWf2XPWRFSmqIttbLdXbcOXGUv9hPLdOoJGCjQobH99e+4vHni5Xed8Fey/hRZ3bX+qx5eC/aPFWw38+KG3dCLL679M6YEt5mA2b9jXtD2P6rgqG33PvunDg9/ZD9lSeXe+K5yZeVarrTA5N6+eTx9lwwGyeDo3hKddG+vZBq/PwAEk9UKPAoAAA=="
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/+1WS2/bMAz+LdWxUL2l3S65pV02FH15TnYYjCBgLMZRK0ueJDfwDP/3QQ8nKboV2GXDhp5MfaQ+ig/ROk1OR++Tt0ewNScFezgRfJV0MwvFA4WtWXaslVAptkq6OawE5h2pQVtuuZJX2JJxRyRUSMbkmFBi29qJM9JTsuJCcFneKOagdPJ1mU6zZTb9/GU6mxNKNFbqEUSqBC9aMiYMjdWqJf2CXqyld9ZTAdWKQdJ9bGThXOYd0Y20fOexCPRO3IBkAnVcoXzkWskKpfVITzsCjE0P4dxbHpNF8Dk4cXKKuuLGcCV7yqFKukz54MGYpkJ27iOvNZcFr0FMikI10RGNNm7DxPNF/6QCCSUyHzFHQ8Z59wRrJzraLuJp5yodXAx5yruotRaKzaUUXOJO52N5UekDdUejAfcpGDbMldM843kOMzazYNFl0cQjeeLA2VNztgRj0Jpk4j7UnCXnTfGA9hwM5gsqVGmS7lqVn7Rq6rwjIoq3Qy8FvsGip1DzEixuoU26DI2d1Nz1QpBu9x3I0BSa17u0O2QNjbAXSptU41rwcmPvvIFxNQQh1PZO85K7daifg27QbhQLUB/TFrzRD1gL1brg8+4nDqHmUdJogcu9uTnsxLm6ViUvQFyyg6r+j7hP3j4LdGahRJ+6AToouVfSDI1qdIG+X1zb0VCPUHOvGm69tXXQRYBLi6WGg4Kog2o3dqM0/+7GxOHqctg9QH7/PIwzf3mh5lfYZvit4RoZGa9BGPyVPSWVP1KGplbSxLtuLNjGXOwnlo7qFDRUaFGb4frHXN48YfldEvqarD+VrHit/yrDa8H+sYLtZl7YsBt64Y2Fu/dEDXaTgt6/Y17QDj8qT9T3e87hqUP9H9lNWS5LZ3zX2LqxPZWKYXJv3jyevktGo2R0dG84P4mvrSQL3x/HH4E1LgoAAA=="
       },
       "Metadata": {
         "aws:cdk:path": "Project03CdkBasicStack/CDKMetadata/Default"
-      },
-      "Condition": "CDKMetadataAvailable"
+      }
     }
   },
   "Outputs": {
@@ -1032,11 +870,7 @@
             {
               "Ref": "PostsApi3071F4B3"
             },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region"
-            },
-            ".",
+            ".execute-api.us-east-1.",
             {
               "Ref": "AWS::URLSuffix"
             },
@@ -1059,11 +893,7 @@
             {
               "Ref": "PostsApi3071F4B3"
             },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region"
-            },
-            ".",
+            ".execute-api.us-east-1.",
             {
               "Ref": "AWS::URLSuffix"
             },
@@ -1081,272 +911,6 @@
       "Value": {
         "Ref": "PostsTableC82B36F0"
       }
-    }
-  },
-  "Conditions": {
-    "CDKMetadataAvailable": {
-      "Fn::Or": [
-        {
-          "Fn::Or": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "af-south-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-east-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-northeast-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-northeast-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-northeast-3"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-south-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-south-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-southeast-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-southeast-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-southeast-3"
-              ]
-            }
-          ]
-        },
-        {
-          "Fn::Or": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ap-southeast-4"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ca-central-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "ca-west-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "cn-north-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "cn-northwest-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-central-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-central-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-north-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-south-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-south-2"
-              ]
-            }
-          ]
-        },
-        {
-          "Fn::Or": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-west-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-west-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "eu-west-3"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "il-central-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "me-central-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "me-south-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "sa-east-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "us-east-1"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "us-east-2"
-              ]
-            },
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "AWS::Region"
-                },
-                "us-west-1"
-              ]
-            }
-          ]
-        },
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "AWS::Region"
-            },
-            "us-west-2"
-          ]
-        }
-      ]
     }
   },
   "Parameters": {}
