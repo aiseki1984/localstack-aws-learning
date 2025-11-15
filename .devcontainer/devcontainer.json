@@ -44,7 +44,8 @@
         "bierner.markdown-mermaid",
         "amazonwebservices.aws-toolkit-vscode",
         "ms-python.python",
-        "ms-python.black-formatter"
+        "ms-python.black-formatter",
+        "biomejs.biome"
       ],
       "settings": {
         "editor.tabSize": 4,

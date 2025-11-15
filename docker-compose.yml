@@ -3,9 +3,9 @@ services:
     container_name: localstack
     image: localstack/localstack
     ports:
-      - '127.0.0.1:4566:4566'
-      - '127.0.0.1:4510-4559:4510-4559'
-      - '127.0.0.1:14566:14566' # テスト用ポート
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4510-4559:4510-4559"
+      - "127.0.0.1:14566:14566" # テスト用ポート
     environment:
       DOCKER_HOST: unix:///var/run/docker.sock
       AWS_ACCESS_KEY_ID: test
@@ -18,7 +18,7 @@ services:
       # PERSISTENCE: 1
       # PERSISTENCE_BACKEND: filesystem
     volumes:
-      - '/var/run/docker.sock:/var/run/docker.sock'
+      - "/var/run/docker.sock:/var/run/docker.sock"
       # # LocalStackデータの永続化
       # - ./localstack-data:/var/lib/localstack
     networks:
@@ -31,7 +31,7 @@ services:
       context: .docker/ubuntu
       dockerfile: Dockerfile
       args:
-        NODE_VERSION: 20 # Node.jsバージョンを指定
+        NODE_VERSION: 24 # Node.jsバージョンを指定
         PYTHON_VERSION: 3.12 # Pythonバージョンを指定
     container_name: localstack_client
     hostname: localstack_client

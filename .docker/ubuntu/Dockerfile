@@ -2,7 +2,7 @@
 FROM ubuntu:22.04
 
 # バージョン設定
-ARG NODE_VERSION=20
+ARG NODE_VERSION=24
 ARG PYTHON_VERSION=3.12
 ENV NODE_VERSION=${NODE_VERSION}
 ENV PYTHON_VERSION=${PYTHON_VERSION}
@@ -101,6 +101,32 @@ RUN npm install -g \
         ts-node \
         @types/node
 
+# Goをインストール（最新版をダウンロード）
+# fontもインストール（Diagram as Codeツール用）
+RUN apt-get update && \
+    apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra && \
+    apt-get clean
+
+# Go 1.23以降をインストール
+WORKDIR /opt
+RUN case "$(uname -m)" in \
+        x86_64) ARCH="amd64" ;; \
+        aarch64|arm64) ARCH="arm64" ;; \
+        *) echo "Unsupported architecture" && exit 1 ;; \
+    esac && \
+    GO_VERSION="1.23.3" && \
+    curl -LO "https://go.dev/dl/go${GO_VERSION}.linux-${ARCH}.tar.gz" && \
+    rm -rf /usr/local/go && \
+    tar -C /usr/local -xzf "go${GO_VERSION}.linux-${ARCH}.tar.gz" && \
+    rm "go${GO_VERSION}.linux-${ARCH}.tar.gz"
+
+ENV PATH="/usr/local/go/bin:${PATH}"
+ENV GOPATH="/home/ubuntu/go"
+ENV PATH="${GOPATH}/bin:${PATH}"
+
+
+
+
 # Docker CLI
 # Docker on Docker (DoD) 
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
@@ -113,7 +139,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
     apt-get clean
 
 RUN groupadd docker && \
-    useradd -u 1000 -g 100 -G sudo,docker -s /bin/bash -d /home/ubuntu ubuntu && \
+    useradd -u 1000 -g 100 -G sudo,docker -s /bin/bash -m -d /home/ubuntu ubuntu && \
     echo "ubuntu:ubuntu" | chpasswd
 
 # sudo権限の設定（dockerコマンドをパスワードなしで実行可能にする）
@@ -121,16 +147,23 @@ RUN groupadd docker && \
 RUN echo 'ubuntu ALL=(ALL) NOPASSWD: /usr/bin/docker' > /etc/sudoers.d/ubuntu-nopasswd-docker && \
     chmod 440 /etc/sudoers.d/ubuntu-nopasswd-docker
 
+# 開発環境の設定（rootユーザーで設定）
+RUN echo 'export PATH="/home/ubuntu/.local/bin:$PATH"' >> /home/ubuntu/.bashrc && \
+    echo 'export GOPATH="/home/ubuntu/go"' >> /home/ubuntu/.bashrc && \
+    echo 'export PATH="/usr/local/go/bin:${GOPATH}/bin:$PATH"' >> /home/ubuntu/.bashrc && \
+    echo 'alias aws="aws --endpoint-url=$AWS_ENDPOINT_URL"' >> /home/ubuntu/.bashrc && \
+    echo 'alias awslocal="aws --endpoint-url=http://localstack:4566"' >> /home/ubuntu/.bashrc && \
+    echo 'alias ll="ls -la"' >> /home/ubuntu/.bashrc && \
+    echo 'alias la="ls -A"' >> /home/ubuntu/.bashrc && \
+    echo 'alias l="ls -CF"' >> /home/ubuntu/.bashrc && \
+    echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /home/ubuntu/.bashrc && \
+    chown -R ubuntu:users /home/ubuntu
+
 USER ubuntu
 WORKDIR /home/ubuntu
 
-# 開発環境の設定
-RUN echo 'export PATH="/home/ubuntu/.local/bin:$PATH"' >> ~/.bashrc && \
-    echo 'alias aws="aws --endpoint-url=$AWS_ENDPOINT_URL"' >> ~/.bashrc && \
-    echo 'alias awslocal="aws --endpoint-url=http://localstack:4566"' >> ~/.bashrc && \
-    echo 'alias ll="ls -la"' >> ~/.bashrc && \
-    echo 'alias la="ls -A"' >> ~/.bashrc && \
-    echo 'alias l="ls -CF"' >> ~/.bashrc && \
-    echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ~/.bashrc
+# GoでAWS Diagram as Codeツールをインストール
+RUN go install github.com/awslabs/diagram-as-code/cmd/awsdac@latest
+RUN go install github.com/awslabs/diagram-as-code/cmd/awsdac-mcp-server@latest
 
 CMD ["bash"]

@@ -1,0 +1,28 @@
+{
+  "servers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--browser=chromium",
+        "--headless"
+      ],
+      "env": {
+        "PLAYWRIGHT_BROWSERS_PATH": "/ms-playwright",
+        "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH": "/ms-playwright/chromium-1179/chrome-linux/chrome"
+      }
+    },
+    "awsdac-mcp-server": {
+      "command": "/home/ubuntu/go/bin/awsdac-mcp-server",
+      "args": [],
+      "type": "stdio"
+    }
+  }
+}

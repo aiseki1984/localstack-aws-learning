@@ -1,0 +1,148 @@
+# Secure Architecture with API Gateway, Lambda in Private Subnet, and VPC Endpoint
+Diagram:
+  DefinitionFiles:
+    - Type: URL
+      Url: 'https://raw.githubusercontent.com/awslabs/diagram-as-code/main/definitions/definition-for-aws-icons-light.yaml'
+
+  Resources:
+    Canvas:
+      Type: AWS::Diagram::Canvas
+      Direction: horizontal
+      Children:
+        - UserStack
+        - MainStack
+
+    UserStack:
+      Type: AWS::Diagram::VerticalStack
+      Children:
+        - User
+
+    User:
+      Type: AWS::Diagram::Resource
+      Preset: User
+
+    MainStack:
+      Type: AWS::Diagram::HorizontalStack
+      Children:
+        - AWSCloud
+
+    AWSCloud:
+      Type: AWS::Diagram::Cloud
+      Direction: horizontal
+      Preset: AWSCloudNoLogo
+      Align: center
+      Children:
+        - APIGateway
+        - VPC
+        - ExternalServices
+
+    # API Gateway (Outside VPC)
+    APIGateway:
+      Type: AWS::ApiGateway
+      Title: "API Gateway\n(REST API)"
+
+    # VPC
+    VPC:
+      Type: AWS::EC2::VPC
+      Title: "VPC\n10.0.0.0/16"
+      Direction: horizontal
+      Children:
+        - PrivateSubnet
+        - DynamoDBEndpoint
+
+    # Private Subnet (Secure Configuration)
+    PrivateSubnet:
+      Type: AWS::EC2::Subnet
+      Preset: PrivateSubnet
+      Title: "Private Subnet\n10.0.10.0/24"
+      Children:
+        - LambdaSecurityGroup
+
+    # Security Group
+    LambdaSecurityGroup:
+      Type: AWS::Diagram::Resource
+      Preset: Generic group
+      Title: 'Security Group'
+      Children:
+        - Lambda
+
+    # Lambda
+    Lambda:
+      Type: AWS::Lambda::Function
+      Title: "Lambda Function\n(SecureAPIFunction)\n+ Parameters Extension"
+
+    # VPC Endpoint (DynamoDB only)
+    DynamoDBEndpoint:
+      Type: AWS::EC2::VPCEndpoint
+      Title: "VPC Endpoint\n(DynamoDB Gateway)\nFree"
+
+    # External AWS Services (Outside VPC)
+    ExternalServices:
+      Type: AWS::Diagram::VerticalStack
+      Children:
+        - DynamoDB
+        - ParameterStore
+
+    DynamoDB:
+      Type: AWS::DynamoDB::Table
+      Title: "DynamoDB\n(Data Store)"
+
+    ParameterStore:
+      Type: AWS::Diagram::Resource
+      Title: "Parameter Store\n(Config & Secrets)\nvia Extension"
+      Preset: AWS Systems Manager
+
+  Links:
+    # User → API Gateway
+    - Source: User
+      SourcePosition: E
+      Target: APIGateway
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+
+    # API Gateway → Lambda
+    - Source: APIGateway
+      SourcePosition: E
+      Target: Lambda
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetRight:
+          Title: 'Invoke'
+
+    # Lambda → DynamoDB via VPC Endpoint
+    - Source: Lambda
+      SourcePosition: E
+      Target: DynamoDBEndpoint
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetRight:
+          Title: 'Read/Write'
+
+    # Lambda → Parameter Store (via Extension)
+    - Source: Lambda
+      SourcePosition: SE
+      Target: ParameterStore
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Type: orthogonal
+      Labels:
+        SourceRight:
+          Title: "Lambda Extension\n(Cache)"
+
+    # VPC Endpoint → DynamoDB
+    - Source: DynamoDBEndpoint
+      SourcePosition: E
+      Target: DynamoDB
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Type: orthogonal
+      Labels:
+        SourceRight:
+          Title: "Gateway EP\n(Free)"
