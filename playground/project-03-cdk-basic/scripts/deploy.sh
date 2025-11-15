@@ -3,8 +3,12 @@
 # CDK スタックを CloudFormation で直接デプロイするスクリプト
 set -e
 
+# スクリプトのディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
 STACK_NAME="Project03CdkBasicStack"
-TEMPLATE_FILE="../cdk.out/Project03CdkBasicStack.template.json"
+TEMPLATE_FILE="${PROJECT_ROOT}/cdk.out/Project03CdkBasicStack.template.json"
 REGION="ap-northeast-1"
 ENDPOINT_URL="http://localstack:4566"
 
@@ -15,17 +19,15 @@ echo "=========================================="
 # 1. Lambda のビルド
 echo ""
 echo "📦 Step 1: Building Lambda function..."
-cd ../lambda
+cd "${PROJECT_ROOT}/lambda"
 npm run build
-cd ../scripts
 
 # 2. Lambda のコードを ZIP にパッケージング
 echo ""
 echo "📦 Step 2: Packaging Lambda code..."
-cd ../lambda/dist
+cd "${PROJECT_ROOT}/lambda/dist"
 zip -r lambda.zip .
-mv lambda.zip ../../scripts/
-cd ../../scripts
+mv lambda.zip "${SCRIPT_DIR}/"
 
 # 3. S3 バケットの作成（Lambda コードアップロード用）
 echo ""
@@ -38,21 +40,20 @@ aws s3 mb s3://${BUCKET_NAME} \
 # 4. Lambda コードを S3 にアップロード
 echo ""
 echo "⬆️  Step 4: Uploading Lambda code to S3..."
-aws s3 cp lambda.zip s3://${BUCKET_NAME}/lambda.zip \
+aws s3 cp "${SCRIPT_DIR}/lambda.zip" s3://${BUCKET_NAME}/lambda.zip \
   --endpoint-url=${ENDPOINT_URL} \
   --region=${REGION}
 
 # 5. CloudFormation テンプレートの生成
 echo ""
 echo "🔨 Step 5: Synthesizing CDK template..."
-cd ..
+cd "${PROJECT_ROOT}"
 npx cdk synth > /dev/null
-cd scripts
 
 # 6. テンプレートを修正（Lambda コードの場所を S3 に変更、Bootstrap パラメータを削除）
 echo ""
 echo "✏️  Step 6: Modifying template for S3 Lambda deployment..."
-MODIFIED_TEMPLATE="modified-template.json"
+MODIFIED_TEMPLATE="${SCRIPT_DIR}/modified-template.json"
 
 # テンプレートをコピーして以下を修正：
 # 1. Lambda Code を S3 パスに変更
@@ -112,7 +113,7 @@ aws cloudformation describe-stacks \
   --output json | jq .
 
 # クリーンアップ（デバッグのためテンプレートは残す）
-rm -f lambda.zip
+rm -f "${SCRIPT_DIR}/lambda.zip"
 # rm -f ${MODIFIED_TEMPLATE}  # デバッグ用に残す
 
 echo ""

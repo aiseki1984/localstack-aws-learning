@@ -3,6 +3,9 @@
 # API をテストするスクリプト
 set -e
 
+# スクリプトのディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 STACK_NAME="Project03CdkBasicStack"
 REGION="ap-northeast-1"
 ENDPOINT_URL="http://localstack:4566"

@@ -3,6 +3,9 @@
 # スタックとリソースを削除するスクリプト
 set -e
 
+# スクリプトのディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 STACK_NAME="Project03CdkBasicStack"
 BUCKET_NAME="cdk-lambda-deployment-bucket"
 REGION="ap-northeast-1"
