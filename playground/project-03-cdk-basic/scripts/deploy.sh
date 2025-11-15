@@ -109,7 +109,7 @@ aws cloudformation describe-stacks \
   --endpoint-url=${ENDPOINT_URL} \
   --region=${REGION} \
   --query 'Stacks[0].Outputs' \
-  --output table
+  --output json | jq .
 
 # クリーンアップ（デバッグのためテンプレートは残す）
 rm -f lambda.zip
