@@ -1,0 +1,318 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Posts API with API Gateway, Lambda, and DynamoDB'
+
+Parameters:
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket containing Lambda code
+    Default: cdk-lambda-deployment-bucket
+  
+  LambdaCodeKey:
+    Type: String
+    Description: S3 key for Lambda code ZIP file
+    Default: lambda.zip
+
+Resources:
+  # ==========================================
+  # DynamoDB テーブル
+  # ==========================================
+  PostsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${AWS::StackName}-PostsTable'
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+
+  # ==========================================
+  # Lambda 実行ロール
+  # ==========================================
+  PostsFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-PostsFunctionRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:BatchGetItem
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:ConditionCheckItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:DescribeTable
+                  - dynamodb:GetItem
+                  - dynamodb:GetRecords
+                  - dynamodb:GetShardIterator
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:UpdateItem
+                Resource:
+                  - !GetAtt PostsTable.Arn
+
+  # ==========================================
+  # Lambda 関数
+  # ==========================================
+  PostsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-PostsFunction'
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt PostsFunctionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Ref LambdaCodeKey
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref PostsTable
+      Timeout: 30
+
+  # Lambda のロググループ
+  PostsFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${PostsFunction}'
+      RetentionInDays: 7
+
+  # ==========================================
+  # API Gateway REST API
+  # ==========================================
+  PostsApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: Posts Service
+      Description: API for managing posts
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  # /posts リソース
+  PostsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref PostsApi
+      ParentId: !GetAtt PostsApi.RootResourceId
+      PathPart: posts
+
+  # /posts/{id} リソース
+  PostIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref PostsApi
+      ParentId: !Ref PostsResource
+      PathPart: '{id}'
+
+  # ==========================================
+  # CORS 設定（OPTIONS メソッド）
+  # ==========================================
+  PostsOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PostsApi
+      ResourceId: !Ref PostsResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 204
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 204
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  PostIdOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PostsApi
+      ResourceId: !Ref PostIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 204
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 204
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # ==========================================
+  # API メソッド（POST /posts）
+  # ==========================================
+  PostsPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PostsApi
+      ResourceId: !Ref PostsResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostsFunction.Arn}/invocations'
+
+  PostsPostPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PostsFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PostsApi}/*/POST/posts'
+
+  # ==========================================
+  # API メソッド（GET /posts）
+  # ==========================================
+  PostsGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PostsApi
+      ResourceId: !Ref PostsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostsFunction.Arn}/invocations'
+
+  PostsGetPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PostsFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PostsApi}/*/GET/posts'
+
+  # ==========================================
+  # API メソッド（GET /posts/{id}）
+  # ==========================================
+  PostIdGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PostsApi
+      ResourceId: !Ref PostIdResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostsFunction.Arn}/invocations'
+
+  PostIdGetPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PostsFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PostsApi}/*/GET/posts/*'
+
+  # ==========================================
+  # API メソッド（PUT /posts/{id}）
+  # ==========================================
+  PostIdPutMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PostsApi
+      ResourceId: !Ref PostIdResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostsFunction.Arn}/invocations'
+
+  PostIdPutPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PostsFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PostsApi}/*/PUT/posts/*'
+
+  # ==========================================
+  # API メソッド（DELETE /posts/{id}）
+  # ==========================================
+  PostIdDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref PostsApi
+      ResourceId: !Ref PostIdResource
+      HttpMethod: DELETE
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostsFunction.Arn}/invocations'
+
+  PostIdDeletePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PostsFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PostsApi}/*/DELETE/posts/*'
+
+  # ==========================================
+  # API デプロイメント
+  # ==========================================
+  PostsApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - PostsPostMethod
+      - PostsGetMethod
+      - PostIdGetMethod
+      - PostIdPutMethod
+      - PostIdDeleteMethod
+      - PostsOptionsMethod
+      - PostIdOptionsMethod
+    Properties:
+      RestApiId: !Ref PostsApi
+      StageName: prod
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub 'https://${PostsApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
+  
+  TableName:
+    Description: DynamoDB Table Name
+    Value: !Ref PostsTable
+  
+  FunctionName:
+    Description: Lambda Function Name
+    Value: !Ref PostsFunction
