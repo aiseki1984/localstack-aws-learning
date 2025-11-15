@@ -1,0 +1,1353 @@
+{
+  "Resources": {
+    "PostsTableC82B36F0": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsTable/Resource"
+      }
+    },
+    "PostsFunctionServiceRoleF2DB8406": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsFunction/ServiceRole/Resource"
+      }
+    },
+    "PostsFunctionServiceRoleDefaultPolicyACA3B729": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+                "dynamodb:GetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:PutItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:UpdateItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "PostsTableC82B36F0",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "PostsFunctionServiceRoleDefaultPolicyACA3B729",
+        "Roles": [
+          {
+            "Ref": "PostsFunctionServiceRoleF2DB8406"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsFunction/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "PostsFunction3DC4AEDB": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-lambda-deployment-bucket",
+          "S3Key": "lambda.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "TABLE_NAME": {
+              "Ref": "PostsTableC82B36F0"
+            }
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "PostsFunctionServiceRoleF2DB8406",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 30
+      },
+      "DependsOn": [
+        "PostsFunctionServiceRoleDefaultPolicyACA3B729",
+        "PostsFunctionServiceRoleF2DB8406"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsFunction/Resource",
+        "aws:asset:path": "asset.bde0c84c832acf14b6bc293a1e09327d0616dee901875f3157867c58a752324d",
+        "aws:asset:is-bundled": false,
+        "aws:asset:property": "Code"
+      }
+    },
+    "PostsFunctionLogGroupC6FCA2A2": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "PostsFunction3DC4AEDB"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 731
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsFunction/LogGroup/Resource"
+      }
+    },
+    "PostsApi3071F4B3": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Description": "API for managing posts",
+        "Name": "Posts Service"
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Resource"
+      }
+    },
+    "PostsApiDeployment7D3D005D4e808f052d59ecdd0ad36aa96da64112": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "Description": "API for managing posts",
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "DependsOn": [
+        "PostsApiOPTIONSCE75E388",
+        "PostsApipostsidDELETE16737D5E",
+        "PostsApipostsidGET9B72BB71",
+        "PostsApipostsidOPTIONSE6F9A6DF",
+        "PostsApipostsidPUTB8247BF8",
+        "PostsApipostsidBB97E669",
+        "PostsApipostsGET34BA7DE4",
+        "PostsApipostsOPTIONS2E79E562",
+        "PostsApipostsPOSTD67FD8AE",
+        "PostsApiposts2B6C6D66"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Deployment/Resource",
+        "aws:cdk:do-not-refactor": true
+      }
+    },
+    "PostsApiDeploymentStageprod5F8E9068": {
+      "Type": "AWS::ApiGateway::Stage",
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "PostsApiDeployment7D3D005D4e808f052d59ecdd0ad36aa96da64112"
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        },
+        "StageName": "prod"
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/DeploymentStage.prod/Resource"
+      }
+    },
+    "PostsApiOPTIONSCE75E388": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ],
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "PostsApi3071F4B3",
+            "RootResourceId"
+          ]
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/OPTIONS/Resource"
+      }
+    },
+    "PostsApiposts2B6C6D66": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "PostsApi3071F4B3",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "posts",
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/Resource"
+      }
+    },
+    "PostsApipostsOPTIONS2E79E562": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ],
+        "ResourceId": {
+          "Ref": "PostsApiposts2B6C6D66"
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/OPTIONS/Resource"
+      }
+    },
+    "PostsApipostsGETApiPermissionProject03CdkBasicStackPostsApiB04CEA04GETposts7AB057CE": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/",
+              {
+                "Ref": "PostsApiDeploymentStageprod5F8E9068"
+              },
+              "/GET/posts"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/GET/ApiPermission.Project03CdkBasicStackPostsApiB04CEA04.GET..posts"
+      }
+    },
+    "PostsApipostsGETApiPermissionTestProject03CdkBasicStackPostsApiB04CEA04GETposts3B70068C": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/test-invoke-stage/GET/posts"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/GET/ApiPermission.Test.Project03CdkBasicStackPostsApiB04CEA04.GET..posts"
+      }
+    },
+    "PostsApipostsGET34BA7DE4": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "PostsFunction3DC4AEDB",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "ResourceId": {
+          "Ref": "PostsApiposts2B6C6D66"
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/GET/Resource"
+      }
+    },
+    "PostsApipostsPOSTApiPermissionProject03CdkBasicStackPostsApiB04CEA04POSTpostsDEE1B76E": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/",
+              {
+                "Ref": "PostsApiDeploymentStageprod5F8E9068"
+              },
+              "/POST/posts"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/POST/ApiPermission.Project03CdkBasicStackPostsApiB04CEA04.POST..posts"
+      }
+    },
+    "PostsApipostsPOSTApiPermissionTestProject03CdkBasicStackPostsApiB04CEA04POSTposts8547793F": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/test-invoke-stage/POST/posts"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/POST/ApiPermission.Test.Project03CdkBasicStackPostsApiB04CEA04.POST..posts"
+      }
+    },
+    "PostsApipostsPOSTD67FD8AE": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "PostsFunction3DC4AEDB",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "ResourceId": {
+          "Ref": "PostsApiposts2B6C6D66"
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/POST/Resource"
+      }
+    },
+    "PostsApipostsidBB97E669": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Ref": "PostsApiposts2B6C6D66"
+        },
+        "PathPart": "{id}",
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/Resource"
+      }
+    },
+    "PostsApipostsidOPTIONSE6F9A6DF": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+              },
+              "StatusCode": "204"
+            }
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }"
+          },
+          "Type": "MOCK"
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "StatusCode": "204"
+          }
+        ],
+        "ResourceId": {
+          "Ref": "PostsApipostsidBB97E669"
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/OPTIONS/Resource"
+      }
+    },
+    "PostsApipostsidGETApiPermissionProject03CdkBasicStackPostsApiB04CEA04GETpostsid2CE8E6B8": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/",
+              {
+                "Ref": "PostsApiDeploymentStageprod5F8E9068"
+              },
+              "/GET/posts/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/GET/ApiPermission.Project03CdkBasicStackPostsApiB04CEA04.GET..posts.{id}"
+      }
+    },
+    "PostsApipostsidGETApiPermissionTestProject03CdkBasicStackPostsApiB04CEA04GETpostsid678299AA": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/test-invoke-stage/GET/posts/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/GET/ApiPermission.Test.Project03CdkBasicStackPostsApiB04CEA04.GET..posts.{id}"
+      }
+    },
+    "PostsApipostsidGET9B72BB71": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "PostsFunction3DC4AEDB",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "ResourceId": {
+          "Ref": "PostsApipostsidBB97E669"
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/GET/Resource"
+      }
+    },
+    "PostsApipostsidPUTApiPermissionProject03CdkBasicStackPostsApiB04CEA04PUTpostsidC721CF73": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/",
+              {
+                "Ref": "PostsApiDeploymentStageprod5F8E9068"
+              },
+              "/PUT/posts/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/PUT/ApiPermission.Project03CdkBasicStackPostsApiB04CEA04.PUT..posts.{id}"
+      }
+    },
+    "PostsApipostsidPUTApiPermissionTestProject03CdkBasicStackPostsApiB04CEA04PUTpostsidBB628E7B": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/test-invoke-stage/PUT/posts/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/PUT/ApiPermission.Test.Project03CdkBasicStackPostsApiB04CEA04.PUT..posts.{id}"
+      }
+    },
+    "PostsApipostsidPUTB8247BF8": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "PUT",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "PostsFunction3DC4AEDB",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "ResourceId": {
+          "Ref": "PostsApipostsidBB97E669"
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/PUT/Resource"
+      }
+    },
+    "PostsApipostsidDELETEApiPermissionProject03CdkBasicStackPostsApiB04CEA04DELETEpostsid1EB54CEC": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/",
+              {
+                "Ref": "PostsApiDeploymentStageprod5F8E9068"
+              },
+              "/DELETE/posts/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/DELETE/ApiPermission.Project03CdkBasicStackPostsApiB04CEA04.DELETE..posts.{id}"
+      }
+    },
+    "PostsApipostsidDELETEApiPermissionTestProject03CdkBasicStackPostsApiB04CEA04DELETEpostsid9B7E1E46": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "PostsFunction3DC4AEDB",
+            "Arn"
+          ]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "PostsApi3071F4B3"
+              },
+              "/test-invoke-stage/DELETE/posts/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/DELETE/ApiPermission.Test.Project03CdkBasicStackPostsApiB04CEA04.DELETE..posts.{id}"
+      }
+    },
+    "PostsApipostsidDELETE16737D5E": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "DELETE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "PostsFunction3DC4AEDB",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "ResourceId": {
+          "Ref": "PostsApipostsidBB97E669"
+        },
+        "RestApiId": {
+          "Ref": "PostsApi3071F4B3"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/PostsApi/Default/posts/{id}/DELETE/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/+1WTW/bMAz9LdWxUL2l3S65pV02FP3KkuwwGEHAWIzDVpY8SW7gGf7vgyQ7SdGtwC4bNvRk6pEiqUeK1mlyOnifvD2CrT3JxMOJpFXSzBxkDxy2dtmIWkGhxSpp5rCSmDasBOPIkVZXWLNhwxQUyIbsmHHm6tKLM9ZytiIpSeU3WnhoMvq6nIyny+n485fxbM44M1joR5ATLSmr2ZAJtM7omrULfrFWIVjLJRQrAUnzsVKZD5k2zFTK0S7iBpSQaLpVFoN5EdUjGa0KVK5PjgrUVVy1vGEgxPjQKA1Wx2wRM+hDenmCpiBrSauWExRJM9WBCrC2KlCcBx5KQyqjEuQoy3S1Cxtt/IZR8NfFZwUoyFGE8xNaNkybJ1g9Mp3tost2rid9iJ61tOm0zkG2uVSSFO504SwvKsNBfWo84oGCfsNce80zP89hIWYOHHoWbZdScBx9ttyeLcFadDYZ+Q+3Z8l5lT2gOweL6YJLndukudb5J6OrMm2Y7MTbvrOiv96i5VBSDg63UCfNFK0bleQ7I0q3+34UaDND5Y52j6yhku5CGzsxuJaUb9xdMLC+hiCl3t4ZysmvY/08dINuo0WE2o62GI1/wFLq2h8+bX4SEErqJIMOSO3N7WEnzvW1zikDeSkOqvo/4oG8PQt85iDHQF0PHZQ8KPkUra5MhqFffNvxWI9Y86Dqx4FzZdR1ACmHuYGDguiDalduow199/PjcHXZ7+6hsH8eh1u4vFDSFdZT/FaRQcGGa5AWf2XPWRFSmqIttbLdXbcOXGUv9hPLdOoJGCjQobH99e+4vHni5Xed8Fey/hRZ3bX+qx5eC/aPFWw38+KG3dCLL679M6YEt5mA2b9jXtD2P6rgqG33PvunDg9/ZD9lSeXe+K5yZeVarrTA5N6+eTx9lwwGyeDo3hKddG+vZBq/PwAEk9UKPAoAAA=="
+      },
+      "Metadata": {
+        "aws:cdk:path": "Project03CdkBasicStack/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Outputs": {
+    "PostsApiEndpoint56996E10": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "PostsApi3071F4B3"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/",
+            {
+              "Ref": "PostsApiDeploymentStageprod5F8E9068"
+            },
+            "/"
+          ]
+        ]
+      }
+    },
+    "ApiUrl": {
+      "Description": "API Gateway URL",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "PostsApi3071F4B3"
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region"
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix"
+            },
+            "/",
+            {
+              "Ref": "PostsApiDeploymentStageprod5F8E9068"
+            },
+            "/"
+          ]
+        ]
+      }
+    },
+    "TableName": {
+      "Description": "DynamoDB Table Name",
+      "Value": {
+        "Ref": "PostsTableC82B36F0"
+      }
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "af-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-3"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-4"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-2"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "il-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region"
+            },
+            "us-west-2"
+          ]
+        }
+      ]
+    }
+  },
+  "Parameters": {}
+}
