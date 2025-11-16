@@ -7,6 +7,7 @@ import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export class Project03Cdk03Stack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -198,6 +199,99 @@ export class Project03Cdk03Stack extends cdk.Stack {
     );
 
     // ═══════════════════════════════════════════════════════
+    // ⚡ Phase 3: Inventory Service Lambda
+    // ═══════════════════════════════════════════════════════
+
+    const inventoryServiceLambda = new lambdaNodejs.NodejsFunction(this, 'InventoryServiceLambda', {
+      functionName: 'inventory-service',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/inventory-service/src/index.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        INVENTORY_TABLE: inventoryTable.tableName,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+
+    // SQS → Lambda イベントソース設定
+    inventoryServiceLambda.addEventSource(
+      new lambdaEventSources.SqsEventSource(inventoryQueue, {
+        batchSize: 10, // 一度に最大10件処理
+        reportBatchItemFailures: true, // 部分的な失敗を報告
+      })
+    );
+
+    // Lambda に権限を付与
+    inventoryTable.grantReadWriteData(inventoryServiceLambda);
+
+    // ═══════════════════════════════════════════════════════
+    // ⚡ Phase 3: Notification Service Lambda
+    // ═══════════════════════════════════════════════════════
+
+    const notificationServiceLambda = new lambdaNodejs.NodejsFunction(this, 'NotificationServiceLambda', {
+      functionName: 'notification-service',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/notification-service/src/index.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        NOTIFICATIONS_TABLE: notificationsTable.tableName,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+
+    // SQS → Lambda イベントソース設定
+    notificationServiceLambda.addEventSource(
+      new lambdaEventSources.SqsEventSource(notificationQueue, {
+        batchSize: 10,
+        reportBatchItemFailures: true,
+      })
+    );
+
+    // Lambda に権限を付与
+    notificationsTable.grantWriteData(notificationServiceLambda);
+
+    // ═══════════════════════════════════════════════════════
+    // ⚡ Phase 3: Billing Service Lambda
+    // ═══════════════════════════════════════════════════════
+
+    const billingServiceLambda = new lambdaNodejs.NodejsFunction(this, 'BillingServiceLambda', {
+      functionName: 'billing-service',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/billing-service/src/index.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        BILLING_TABLE: billingTable.tableName,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+
+    // SQS → Lambda イベントソース設定
+    billingServiceLambda.addEventSource(
+      new lambdaEventSources.SqsEventSource(billingQueue, {
+        batchSize: 10,
+        reportBatchItemFailures: true,
+      })
+    );
+
+    // Lambda に権限を付与
+    billingTable.grantWriteData(billingServiceLambda);
+
+    // ═══════════════════════════════════════════════════════
     // 📤 CloudFormation Outputs
     // ═══════════════════════════════════════════════════════
 
@@ -259,6 +353,21 @@ export class Project03Cdk03Stack extends cdk.Stack {
     new cdk.CfnOutput(this, 'OrdersEndpoint', {
       value: `${api.url}orders`,
       description: '注文エンドポイント（POST）',
+    });
+
+    new cdk.CfnOutput(this, 'InventoryServiceLambdaName', {
+      value: inventoryServiceLambda.functionName,
+      description: 'Inventory Service Lambda関数名',
+    });
+
+    new cdk.CfnOutput(this, 'NotificationServiceLambdaName', {
+      value: notificationServiceLambda.functionName,
+      description: 'Notification Service Lambda関数名',
+    });
+
+    new cdk.CfnOutput(this, 'BillingServiceLambdaName', {
+      value: billingServiceLambda.functionName,
+      description: 'Billing Service Lambda関数名',
     });
   }
 }
