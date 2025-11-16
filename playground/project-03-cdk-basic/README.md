@@ -191,3 +191,36 @@ API をテストします：
 - Lambda 関数に DynamoDB CRUD 処理を実装
 - エラーハンドリングの改善
 - テストケースの追加
+
+## CDK local
+
+cdklocal をインストールしているので、それで実行する。
+
+```bash
+cdklocal bootstrap
+cdklocal deploy
+
+# リソースの確認
+awslocal cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE
+awslocal cloudformation describe-stack-resources --stack-name Project03CdkBasicStack
+awslocal lambda list-functions --query 'Functions[*].[FunctionName,Runtime,Handler]' --output table
+```
+
+### 確認コマンド
+
+```bash
+# すべてのスタックを確認
+awslocal cloudformation list-stacks
+
+# 特定のスタックのリソースを確認
+awslocal cloudformation describe-stack-resources --stack-name Project03CdkBasicStack
+
+# Lambda関数一覧
+awslocal lambda list-functions
+
+# DynamoDBテーブル一覧
+awslocal dynamodb list-tables
+
+# API Gateway一覧
+awslocal apigateway get-rest-apis
+```
