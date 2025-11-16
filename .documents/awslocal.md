@@ -24,3 +24,7 @@ $ cdklocal --version
 $ awslocal s3 mb s3://my-test-bucket
 $ awslocal s3 ls
 ```
+
+```bash
+$ cdklocal init app --language typescript
+```
