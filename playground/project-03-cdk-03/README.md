@@ -47,10 +47,63 @@ SNS Topic (order-events) ← ファンアウトハブ
 
 ## 📝 実装ステップ
 
-- [x] **Phase 1**: 基礎インフラ（DynamoDB、SNS、SQS）✅ **← 今ココ**
-- [ ] **Phase 2**: Order Processor Lambda + API Gateway
-- [ ] **Phase 3**: マイクロサービス Lambda（3 つ）
-- [ ] **Phase 4**: テスト・動作確認
+### ✅ Phase 1: 基礎インフラ構築（完了）
+
+**目的**: イベント駆動アーキテクチャの土台を作る
+
+- DynamoDB テーブル 4 つを作成（各マイクロサービス用のデータストア）
+- SNS Topic を作成（イベントのファンアウトハブとして機能）
+- SQS キュー 3 つ + DLQ を作成（マイクロサービス間の疎結合通信）
+- SNS → SQS のサブスクリプション設定（1 イベントを複数サービスに配信）
+- 初期データ投入スクリプト作成（テスト用の商品在庫データ）
+
+### 🚧 Phase 2: Order Processor Lambda + API Gateway（次のステップ）
+
+**目的**: 注文受付のエントリポイントを作る
+
+- API Gateway REST API を作成（POST /orders エンドポイント）
+- Order Processor Lambda 関数を実装（TypeScript、NodejsFunction で自動ビルド）
+- 注文データのバリデーション処理（必須フィールド、データ型チェック）
+- orders テーブルへの保存処理（注文 ID 生成、タイムスタンプ付与）
+- SNS への注文イベント発行（JSON ペイロードでファンアウト）
+
+### 🚧 Phase 3: マイクロサービス Lambda（3 つ）
+
+**目的**: 独立した複数のサービスで並行処理を実現
+
+#### 3-1. Inventory Service Lambda
+
+- SQS（inventory-queue）をトリガーに設定
+- 商品 ID で在庫テーブルを検索し、在庫数をチェック
+- 在庫がある場合は引き当て処理（stock - quantity で更新）
+- 在庫不足の場合はエラーログ出力（他サービスには影響させない）
+- 処理結果を inventory テーブルに記録（処理履歴として）
+
+#### 3-2. Notification Service Lambda
+
+- SQS（notification-queue）をトリガーに設定
+- 顧客へのメール通知をシミュレート（実際はログ出力）
+- SMS 通知をシミュレート（実際はログ出力）
+- 通知履歴を notifications テーブルに保存（送信日時、宛先、内容）
+- 通知失敗時のリトライ処理（SQS の自動リトライ機能を活用）
+
+#### 3-3. Billing Service Lambda
+
+- SQS（billing-queue）をトリガーに設定
+- 注文金額の計算処理（商品価格 × 数量の合計）
+- 決済処理のシミュレート（実際はログ出力）
+- 請求情報を billing テーブルに記録（請求 ID、注文 ID、金額、ステータス）
+- 決済エラー時の DLQ 送信処理（3 回失敗で自動的に DLQ へ）
+
+### 🚧 Phase 4: テスト・動作確認
+
+**目的**: システム全体のエンドツーエンドテストを実施
+
+- テストスクリプト作成（curl で API Gateway にリクエスト送信）
+- 正常フローのテスト（在庫あり → 全サービス成功を確認）
+- エラーフローのテスト（在庫切れ商品の注文で Inventory Service のみ失敗）
+- 並行処理のテスト（複数注文を同時送信してファンアウトを確認）
+- DLQ の動作確認（意図的にエラーを発生させて DLQ への転送を確認）
 
 ## 🚀 デプロイ手順
 
