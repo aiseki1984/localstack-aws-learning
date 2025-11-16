@@ -20,6 +20,68 @@ SNS Topic (order-events) ← ファンアウトハブ
     └─→ SQS → Billing Service Lambda (請求処理)
 ```
 
+```mermaid
+graph TB
+    User[👤 Customer]
+
+    subgraph AWS["☁️ AWS Cloud"]
+        API[API Gateway<br/>POST /orders]
+        OrderProc[Order Processor<br/>Lambda]
+
+        OrdersDB[(Orders<br/>Table)]
+        SNS[📢 SNS Topic<br/>order-events]
+
+        subgraph Inventory["📦 Inventory Service"]
+            InvQ[inventory-queue]
+            InvLambda[Inventory Lambda]
+            InvDB[(Inventory Table)]
+        end
+
+        subgraph Notification["📧 Notification Service"]
+            NotQ[notification-queue]
+            NotLambda[Notification Lambda]
+            NotDB[(Notifications Table)]
+        end
+
+        subgraph Billing["💳 Billing Service"]
+            BillQ[billing-queue]
+            BillLambda[Billing Lambda]
+            BillDB[(Billing Table)]
+        end
+
+        DLQ[🗑️ Dead Letter Queue]
+    end
+
+    User -->|POST /orders| API
+    API --> OrderProc
+    OrderProc -->|PutItem| OrdersDB
+    OrderProc -->|Publish| SNS
+
+    SNS -.->|Fanout| InvQ
+    SNS -.->|Fanout| NotQ
+    SNS -.->|Fanout| BillQ
+
+    InvQ --> InvLambda
+    InvLambda -->|Update Stock| InvDB
+
+    NotQ --> NotLambda
+    NotLambda -->|PutItem| NotDB
+
+    BillQ --> BillLambda
+    BillLambda -->|PutItem| BillDB
+
+    InvQ -.->|On Error 3x| DLQ
+    NotQ -.->|On Error 3x| DLQ
+    BillQ -.->|On Error 3x| DLQ
+
+    style User fill:#e1f5ff
+    style SNS fill:#ff9900
+    style DLQ fill:#ff6b6b
+    style Inventory fill:#e8f5e9
+    style Notification fill:#fff3e0
+    style Billing fill:#f3e5f5
+```
+
 ## 🏗️ アーキテクチャコンポーネント
 
 ### DynamoDB テーブル
