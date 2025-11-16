@@ -20,8 +20,12 @@
       }
     },
     "awsdac-mcp-server": {
-      "command": "/home/ubuntu/go/bin/awsdac-mcp-server",
-      "args": [],
+      "command": "bash",
+      "args": [
+        "-l",
+        "-c",
+        "awsdac-mcp-server"
+      ],
       "type": "stdio"
     }
   }
