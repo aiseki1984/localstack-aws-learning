@@ -4,6 +4,9 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 
 export class Project03Cdk03Stack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -141,6 +144,60 @@ export class Project03Cdk03Stack extends cdk.Stack {
     );
 
     // ═══════════════════════════════════════════════════════
+    // ⚡ Phase 2: Order Processor Lambda
+    // ═══════════════════════════════════════════════════════
+
+    const orderProcessorLambda = new lambdaNodejs.NodejsFunction(this, 'OrderProcessorLambda', {
+      functionName: 'order-processor',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/order-processor/src/index.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        ORDERS_TABLE: ordersTable.tableName,
+        TOPIC_ARN: orderEventsTopic.topicArn,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+
+    // Lambda に権限を付与
+    ordersTable.grantWriteData(orderProcessorLambda);
+    orderEventsTopic.grantPublish(orderProcessorLambda);
+
+    // ═══════════════════════════════════════════════════════
+    // 🌐 Phase 2: API Gateway
+    // ═══════════════════════════════════════════════════════
+
+    const api = new apigateway.RestApi(this, 'OrdersApi', {
+      restApiName: 'Orders Service API',
+      description: 'E-コマース注文処理API',
+      deployOptions: {
+        stageName: 'prod',
+        loggingLevel: apigateway.MethodLoggingLevel.INFO,
+        dataTraceEnabled: true,
+      },
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+      },
+    });
+
+    // /orders エンドポイント
+    const ordersResource = api.root.addResource('orders');
+    
+    // POST /orders
+    ordersResource.addMethod(
+      'POST',
+      new apigateway.LambdaIntegration(orderProcessorLambda, {
+        proxy: true,
+      })
+    );
+
+    // ═══════════════════════════════════════════════════════
     // 📤 CloudFormation Outputs
     // ═══════════════════════════════════════════════════════
 
@@ -187,6 +244,21 @@ export class Project03Cdk03Stack extends cdk.Stack {
     new cdk.CfnOutput(this, 'DeadLetterQueueUrl', {
       value: deadLetterQueue.queueUrl,
       description: 'Dead Letter Queue URL',
+    });
+
+    new cdk.CfnOutput(this, 'OrderProcessorLambdaName', {
+      value: orderProcessorLambda.functionName,
+      description: 'Order Processor Lambda関数名',
+    });
+
+    new cdk.CfnOutput(this, 'ApiGatewayUrl', {
+      value: api.url,
+      description: 'API Gateway URL',
+    });
+
+    new cdk.CfnOutput(this, 'OrdersEndpoint', {
+      value: `${api.url}orders`,
+      description: '注文エンドポイント（POST）',
     });
   }
 }
