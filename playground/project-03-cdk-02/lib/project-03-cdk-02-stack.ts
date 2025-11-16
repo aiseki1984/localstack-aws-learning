@@ -49,7 +49,7 @@ export class Project03Cdk02Stack extends cdk.Stack {
     // ⚡ Step 4: Lambda関数を作成
     const fileProcessor = new lambda.Function(this, 'FileProcessor', {
       functionName: 'file-processor',
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda/dist'),
       timeout: cdk.Duration.seconds(60),
