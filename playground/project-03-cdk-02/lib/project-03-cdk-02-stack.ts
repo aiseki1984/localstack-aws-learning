@@ -4,6 +4,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 
@@ -47,17 +48,23 @@ export class Project03Cdk02Stack extends cdk.Stack {
     });
 
     // ⚡ Step 4: Lambda関数を作成
-    const fileProcessor = new lambda.Function(this, 'FileProcessor', {
+    // NodejsFunctionを使うと、TypeScriptを自動的にビルドしてくれる
+    const fileProcessor = new lambdaNodejs.NodejsFunction(this, 'FileProcessor', {
       functionName: 'file-processor',
       runtime: lambda.Runtime.NODEJS_22_X,
-      handler: 'index.handler',
-      code: lambda.Code.fromAsset('lambda/dist'),
+      entry: 'lambda/src/index.ts', // TypeScriptのソースファイルを直接指定
+      handler: 'handler',
       timeout: cdk.Duration.seconds(60),
+      bundling: {
+        minify: true, // 本番用に最適化
+        sourceMap: false,
+        externalModules: [
+          '@aws-sdk/*', // AWS SDK v3は Lambda にプリインストールされている
+        ],
+      },
       environment: {
         TABLE_NAME: fileMetadataTable.tableName,
         PROCESSED_BUCKET: processedBucket.bucketName,
-        // LocalStack内部からは自動的にエンドポイントが設定される
-        // 外部から呼び出す場合のみ明示的に設定
       },
     });
 
