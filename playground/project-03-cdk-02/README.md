@@ -36,10 +36,20 @@ npm run build
 ### 3. LocalStack へデプロイ
 
 ```bash
+# 初回
+cdklocal bootstrap
 cdklocal deploy --require-approval never
 ```
 
 **これだけで完了！** S3 イベント通知も自動的に設定されます。
+
+### リソースの確認方法
+
+```bash
+awslocal cloudformation list-stacks --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE
+awslocal cloudformation describe-stack-resources --stack-name Project03CdkBasicStack
+awslocal lambda list-functions --query 'Functions[*].[FunctionName,Runtime,Handler]' --output table
+```
 
 ### 💡 LocalStack での S3 イベント通知の実装方法
 
