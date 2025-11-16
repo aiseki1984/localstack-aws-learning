@@ -98,7 +98,7 @@ awslocal dynamodb get-item \
   --table-name ${TABLE_NAME} \
   --key "{\"fileId\":{\"S\":\"${FILE_NAME}\"},\"timestamp\":{\"S\":\"$(awslocal dynamodb scan --table-name ${TABLE_NAME} --filter-expression 'fileId = :fid' --expression-attribute-values "{\":fid\":{\"S\":\"${FILE_NAME}\"}}" --query 'Items[0].timestamp.S' --output text)\"}}" \
   --query 'Item.{FileID:fileId.S,Status:status.S,Size:fileSize.N,ContentType:contentType.S,ProcessedAt:processedAt.S,OriginalBucket:originalBucket.S,OriginalKey:originalKey.S}' \
-  --output table 2>/dev/null || echo "詳細情報の取得に失敗しました"
+  --output json 2>/dev/null || echo "詳細情報の取得に失敗しました"
 
 # 5.2 処理済みバケットを確認
 echo ""

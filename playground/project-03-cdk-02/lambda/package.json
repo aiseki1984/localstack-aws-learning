@@ -2,9 +2,24 @@
   "name": "file-processor-lambda",
   "version": "1.0.0",
   "description": "S3ファイル処理Lambda関数",
-  "main": "file-processor.js",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --minify --platform=node --target=es2020 --outfile=dist/index.js --external:@aws-sdk/*",
+    "build:watch": "npm run build -- --watch",
+    "test": "vitest run",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.932.0",
     "@aws-sdk/client-s3": "^3.0.0",
-    "@aws-sdk/client-dynamodb": "^3.0.0"
+    "@aws-sdk/lib-dynamodb": "^3.932.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.158",
+    "@types/node": "^24.10.1",
+    "esbuild": "^0.27.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.9"
   }
 }

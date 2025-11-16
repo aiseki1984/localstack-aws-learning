@@ -50,8 +50,8 @@ export class Project03Cdk02Stack extends cdk.Stack {
     const fileProcessor = new lambda.Function(this, 'FileProcessor', {
       functionName: 'file-processor',
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'file-processor.handler',
-      code: lambda.Code.fromAsset('lambda'),
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('lambda/dist'),
       timeout: cdk.Duration.seconds(60),
       environment: {
         TABLE_NAME: fileMetadataTable.tableName,

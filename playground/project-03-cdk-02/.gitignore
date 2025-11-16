@@ -1,5 +1,5 @@
 *.js
-!lambda/**/*.js
+!lambda/_archived/file-processor.js
 !jest.config.js
 *.d.ts
 node_modules
