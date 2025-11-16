@@ -68,10 +68,23 @@ export class Project03Cdk02Stack extends cdk.Stack {
     fileMetadataTable.grantWriteData(fileProcessor); // DynamoDBへ書き込み
 
     // 🔗 Step 5: S3イベント通知をSQSに送信
+    // 通常の方法（本番AWS用）
     uploadBucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
       new s3n.SqsDestination(fileQueue)
     );
+
+    // 🔧 LocalStack用の回避策: L1コンストラクトを直接操作
+    // Custom::S3BucketNotificationsがLocalStackでサポートされていないための対処
+    const cfnBucket = uploadBucket.node.defaultChild as s3.CfnBucket;
+    cfnBucket.notificationConfiguration = {
+      queueConfigurations: [
+        {
+          event: 's3:ObjectCreated:*',
+          queue: fileQueue.queueArn,
+        },
+      ],
+    };
 
     // 🔗 Step 6: SQSをLambdaのトリガーに設定
     fileProcessor.addEventSource(

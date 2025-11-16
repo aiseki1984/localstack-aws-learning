@@ -39,15 +39,40 @@ npm run build
 cdklocal deploy --require-approval never
 ```
 
-### 4. ⚠️ 重要: S3 イベント通知の手動設定
+**これだけで完了！** S3 イベント通知も自動的に設定されます。
 
-**LocalStack の制限**: CDK の `addEventNotification` は CloudFormation の `Custom::S3BucketNotifications` リソースを使用しますが、LocalStack の無料版ではこれがサポートされていません。そのため、デプロイ後に手動で S3 イベント通知を設定する必要があります。
+### 💡 LocalStack での S3 イベント通知の実装方法
 
-```bash
-bash scripts/setup-s3-notifications.sh
+LocalStack の無料版では CloudFormation の `Custom::S3BucketNotifications` カスタムリソースがサポートされていないため、CDK の `addEventNotification` は通常動作しません。
+
+このプロジェクトでは、**L1 コンストラクト（CfnBucket）を直接操作する回避策**を実装しています：
+
+```typescript
+// 通常の CDK の書き方（本番 AWS 用）
+uploadBucket.addEventNotification(
+  s3.EventType.OBJECT_CREATED,
+  new s3n.SqsDestination(fileQueue)
+);
+
+// LocalStack 用の回避策
+const cfnBucket = uploadBucket.node.defaultChild as s3.CfnBucket;
+cfnBucket.notificationConfiguration = {
+  queueConfigurations: [
+    {
+      event: 's3:ObjectCreated:*',
+      queue: fileQueue.queueArn,
+    },
+  ],
+};
 ```
 
-**注意**: 本番 AWS 環境では、この手動設定は不要です。CDK が自動的に設定します。
+この方法により：
+
+- ✅ デプロイだけで S3 イベント通知が自動設定される
+- ✅ 手動スクリプトの実行が不要
+- ✅ 本番 AWS 環境でも問題なく動作
+
+**参考**: [LocalStack Issue #9352](https://github.com/localstack/localstack/issues/9352#issuecomment-1862125662)
 
 ## 使い方
 
@@ -139,18 +164,49 @@ uploadBucket.grantDelete(fileProcessor);
 fileMetadataTable.grantWriteData(fileProcessor);
 ```
 
+### LocalStack での CDK カスタムリソース回避
+
+CDK の高レベル API（L2/L3 コンストラクト）は内部でカスタムリソースを使用することがありますが、LocalStack の無料版ではサポートされていません。
+
+**解決策**: L1 コンストラクト（Cfn\*クラス）を直接操作して CloudFormation テンプレートを制御します。
+
+```typescript
+// L2 コンストラクトから L1 コンストラクトを取得
+const cfnBucket = uploadBucket.node.defaultChild as s3.CfnBucket;
+
+// CloudFormation プロパティを直接設定
+cfnBucket.notificationConfiguration = {
+  queueConfigurations: [
+    {
+      event: 's3:ObjectCreated:*',
+      queue: fileQueue.queueArn,
+    },
+  ],
+};
+```
+
+この技法は、LocalStack で CDK の高レベル API が動作しない場合の汎用的な回避策として使えます。
+
 ## トラブルシューティング
 
-### S3 イベント通知が動作しない
-
-デプロイ後に `scripts/setup-s3-notifications.sh` を実行したか確認してください。
+### S3 イベント通知が設定されているか確認
 
 ```bash
-# 現在の設定を確認
 awslocal s3api get-bucket-notification-configuration --bucket file-processor-uploads
+```
 
-# 設定がない場合は実行
-bash scripts/setup-s3-notifications.sh
+正しく設定されている場合、以下のような出力が表示されます：
+
+```json
+{
+  "QueueConfigurations": [
+    {
+      "Id": "...",
+      "QueueArn": "arn:aws:sqs:us-east-1:000000000000:file-processing-queue",
+      "Events": ["s3:ObjectCreated:*"]
+    }
+  ]
+}
 ```
 
 ### Lambda が実行されない
@@ -182,6 +238,16 @@ cdklocal destroy --force
 3. Step Functions で複雑なワークフローを構築
 4. 複数の Lambda 関数で並列処理
 5. S3 Select でファイル内容の部分的な読み取り
+
+---
+
+## 参考情報
+
+### LocalStack の制限と回避策
+
+- [LocalStack Issue #9352 - Custom Resources Support](https://github.com/localstack/localstack/issues/9352)
+- カスタムリソースは LocalStack Pro でのみサポート
+- L1 コンストラクトを使った回避策が有効
 
 ## おすすめアーキテクチャ 3 選
 
