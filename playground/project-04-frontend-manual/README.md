@@ -84,6 +84,22 @@ awslocal s3 rb s3://sample-bucket
 
 ## Nextjs
 
+Nextjs を静的サイトとしてデプロイする。
+[How to create a static export of your Next.js application](https://nextjs.org/docs/app/guides/static-exports)
+
 ```bash
 npx create-next-app@latest frontend-nextjs --yes
+
+# next.config.ts で
+# output: 'export',
+# にしておく
 ```
+
+s3
+
+```bash
+# S3にアップロード
+awslocal s3 sync ./frontend-nextjs/out s3://sample-bucket
+```
+
+http://sample-bucket.s3.localhost.localhost.localstack.cloud:4566/index.html
