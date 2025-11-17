@@ -216,6 +216,8 @@ LocalStack や AWS では、フロントエンド(S3)と API Gateway 間の通�
 
 ### Lambda と API Gateway の統合
 
+既に lambda/todos/ にひな型は作ってあるので、適宜改変する。
+
 - Lambda プロキシ統合の理解
 - イベントオブジェクトの構造
 - レスポンスフォーマット（statusCode, headers, body）
