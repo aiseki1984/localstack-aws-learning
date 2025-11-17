@@ -23,7 +23,10 @@ awslocal s3 mb s3://sample-bucket
 awslocal s3 ls sample-bucket
 
 # 2. 作成したバケットをパブリックアクセスを可能にする
-awslocal s3api put-public-access-block --bucket sample-bucket --public-access-block-configuration  "BlockPublicAcls=false,IgnorePublicAcls=false,BlockPublicPolicy=false,RestrictPublicBuckets=false"
+awslocal s3api put-public-access-block \
+  --bucket sample-bucket \
+  --public-access-block-configuration \
+  "BlockPublicAcls=false,IgnorePublicAcls=false,BlockPublicPolicy=false,RestrictPublicBuckets=false"
 
 # 3. 作成したバケットのバケットポリシーの設定
 touch bucket-policy.json
@@ -49,6 +52,38 @@ awslocal s3 sync ./frontend/dist s3://sample-bucket
 
 http://sample-bucket.s3.localhost.localhost.localstack.cloud:4566/index.html
 
+## クリーンアップ
+
+```bash
+# 1. S3バケット内のオブジェクトをすべて削除
+awslocal s3 rm s3://sample-bucket --recursive
+
+# 2. S3バケットを削除
+awslocal s3 rb s3://sample-bucket
+```
+
 ## 参考
 
 - [LocalStack を使用して、ローカル環境で S3 を利用した静的ウェブページのホスティング手順](https://qiita.com/tsuno0821/items/248cfa05566d03619345)
+- [https://qiita.com/y_inoue15/items/c637dd2e269f7ab50e38](https://qiita.com/y_inoue15/items/c637dd2e269f7ab50e38)
+
+### S3
+
+- **BlockPublicAcls**: `false`
+  - パブリックアクセスを許可する新しい ACL（Access Control List）の設定をブロックするかどうか
+  - `false` = 新しいパブリック ACL の設定を許可
+- **IgnorePublicAcls**: `false`
+  - 既存のパブリック ACL を無視するかどうか
+  - `false` = 既存のパブリック ACL を有効にする
+- **BlockPublicPolicy**: `false`
+  - パブリックアクセスを許可するバケットポリシーの設定をブロックするかどうか
+  - `false` = パブリックアクセスを許可するバケットポリシーを設定可能
+- **RestrictPublicBuckets**: `false`
+  - パブリックポリシーが設定されたバケットへのクロスアカウントアクセスを制限するかどうか
+  - `false` = クロスアカウントアクセスを許可
+
+## Nextjs
+
+```bash
+npx create-next-app@latest frontend-nextjs --yes
+```
