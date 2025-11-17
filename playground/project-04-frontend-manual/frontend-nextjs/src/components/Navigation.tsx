@@ -31,6 +31,14 @@ export default function Navigation() {
             </li>
             <li>
               <Link
+                href="/posts"
+                className="text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+              >
+                Posts
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/contact"
                 className="text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
               >
@@ -97,6 +105,15 @@ export default function Navigation() {
                 className="block text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
               >
                 About
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/posts"
+                onClick={closeMenu}
+                className="block text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+              >
+                Posts
               </Link>
             </li>
             <li>
