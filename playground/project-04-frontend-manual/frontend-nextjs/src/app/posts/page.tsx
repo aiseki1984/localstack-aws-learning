@@ -7,27 +7,27 @@ import { useState } from "react";
 
 export default function Posts() {
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  
-  const { data: posts, error: postsError, isLoading: postsLoading } = useSWR<Post[]>(
-    "/posts",
-    fetcher
-  );
 
-  const { data: users, error: usersError } = useSWR<User[]>(
-    "/users",
-    fetcher
-  );
+  const {
+    data: posts,
+    error: postsError,
+    isLoading: postsLoading,
+  } = useSWR<Post[]>("/posts", fetcher);
+
+  const { data: users, error: usersError } = useSWR<User[]>("/users", fetcher);
 
   const { data: userPosts } = useSWR<Post[]>(
     selectedUserId ? `/users/${selectedUserId}/posts` : null,
-    fetcher
+    fetcher,
   );
 
   if (postsError || usersError) {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-red-800 dark:text-red-200">データの取得に失敗しました。</p>
+          <p className="text-red-800 dark:text-red-200">
+            データの取得に失敗しました。
+          </p>
         </div>
       </div>
     );
@@ -62,7 +62,7 @@ export default function Posts() {
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               selectedUserId === null
                 ? "bg-blue-600 dark:bg-blue-500 text-white"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
             }`}
           >
             All Users
@@ -75,7 +75,7 @@ export default function Posts() {
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedUserId === user.id
                   ? "bg-blue-600 dark:bg-blue-500 text-white"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
               }`}
             >
               {user.name}
