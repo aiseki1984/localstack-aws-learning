@@ -1,0 +1,389 @@
+Diagram:
+  DefinitionFiles:
+    - Type: URL
+      Url: https://raw.githubusercontent.com/awslabs/diagram-as-code/main/definitions/definition-for-aws-icons-light.yaml
+  
+  Resources:
+    Canvas:
+      Type: AWS::Diagram::Canvas
+      Direction: vertical
+      Children:
+        - User
+        - AWSCloud
+    
+    User:
+      Type: AWS::Diagram::Resource
+      Preset: User
+      Title: Web Browser
+    
+    AWSCloud:
+      Type: AWS::Diagram::Cloud
+      Preset: AWSCloudNoLogo
+      Direction: vertical
+      Children:
+        - FrontendBucket
+        - APIGateway
+        - WriteFlow
+        - ReadFlow
+    
+    FrontendBucket:
+      Type: AWS::S3::Bucket
+      Title: Frontend (Next.js)
+    
+    APIGateway:
+      Type: AWS::ApiGateway::RestApi
+      Title: API Gateway
+    
+    WriteFlow:
+      Type: AWS::Diagram::VerticalStack
+      Children:
+        - OrderProcessor
+        - OrdersTable
+        - SNSTopic
+        - QueueRow
+        - ServiceRow
+        - DataRow
+    
+    OrderProcessor:
+      Type: AWS::Lambda::Function
+      Title: Order Processor
+    
+    OrdersTable:
+      Type: AWS::DynamoDB::Table
+      Title: Orders Table
+    
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      Title: SNS Topic (Fanout)
+    
+    QueueRow:
+      Type: AWS::Diagram::HorizontalStack
+      Children:
+        - InventoryQueue
+        - NotificationQueue
+        - BillingQueue
+        - DLQ
+    
+    InventoryQueue:
+      Type: AWS::SQS::Queue
+      Title: Inventory Q
+    
+    NotificationQueue:
+      Type: AWS::SQS::Queue
+      Title: Notification Q
+    
+    BillingQueue:
+      Type: AWS::SQS::Queue
+      Title: Billing Q
+    
+    DLQ:
+      Type: AWS::SQS::Queue
+      Title: DLQ
+    
+    ServiceRow:
+      Type: AWS::Diagram::HorizontalStack
+      Children:
+        - InventoryService
+        - NotificationService
+        - BillingService
+    
+    InventoryService:
+      Type: AWS::Lambda::Function
+      Title: Inventory Service
+    
+    NotificationService:
+      Type: AWS::Lambda::Function
+      Title: Notification Service
+    
+    BillingService:
+      Type: AWS::Lambda::Function
+      Title: Billing Service
+    
+    DataRow:
+      Type: AWS::Diagram::HorizontalStack
+      Children:
+        - InventoryTable
+        - NotificationsTable
+        - BillingTable
+    
+    InventoryTable:
+      Type: AWS::DynamoDB::Table
+      Title: Inventory Table
+    
+    NotificationsTable:
+      Type: AWS::DynamoDB::Table
+      Title: Notifications Table
+    
+    BillingTable:
+      Type: AWS::DynamoDB::Table
+      Title: Billing Table
+    
+    ReadFlow:
+      Type: AWS::Diagram::HorizontalStack
+      Children:
+        - GetOrders
+        - GetInventory
+        - GetNotifications
+        - GetBilling
+        - GetDashboard
+    
+    GetOrders:
+      Type: AWS::Lambda::Function
+      Title: GET Orders
+    
+    GetInventory:
+      Type: AWS::Lambda::Function
+      Title: GET Inventory
+    
+    GetNotifications:
+      Type: AWS::Lambda::Function
+      Title: GET Notifications
+    
+    GetBilling:
+      Type: AWS::Lambda::Function
+      Title: GET Billing
+    
+    GetDashboard:
+      Type: AWS::Lambda::Function
+      Title: GET Dashboard
+  
+  Links:
+    # User -> Frontend
+    - Source: User
+      SourcePosition: S
+      Target: FrontendBucket
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    # Frontend -> API Gateway
+    - Source: FrontendBucket
+      SourcePosition: S
+      Target: APIGateway
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        SourceRight:
+          Title: "API Calls"
+    
+    # API Gateway -> Order Processor
+    - Source: APIGateway
+      SourcePosition: S
+      Target: OrderProcessor
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        SourceRight:
+          Title: "POST /orders"
+    
+    # Order Processor -> Orders Table
+    - Source: OrderProcessor
+      SourcePosition: S
+      Target: OrdersTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        SourceRight:
+          Title: "Write"
+    
+    # Order Processor -> SNS
+    - Source: OrderProcessor
+      SourcePosition: S
+      Target: SNSTopic
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        SourceRight:
+          Title: "Publish Event"
+    
+    # SNS -> Queues (Fanout)
+    - Source: SNSTopic
+      SourcePosition: S
+      Target: InventoryQueue
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: SNSTopic
+      SourcePosition: S
+      Target: NotificationQueue
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: SNSTopic
+      SourcePosition: S
+      Target: BillingQueue
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    # Queues -> Services
+    - Source: InventoryQueue
+      SourcePosition: S
+      Target: InventoryService
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: NotificationQueue
+      SourcePosition: S
+      Target: NotificationService
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: BillingQueue
+      SourcePosition: S
+      Target: BillingService
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    # Services -> Tables
+    - Source: InventoryService
+      SourcePosition: S
+      Target: InventoryTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: NotificationService
+      SourcePosition: S
+      Target: NotificationsTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: BillingService
+      SourcePosition: S
+      Target: BillingTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    # Queues -> DLQ (Error)
+    - Source: InventoryQueue
+      SourcePosition: E
+      Target: DLQ
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        SourceRight:
+          Title: "Error"
+    
+    - Source: NotificationQueue
+      SourcePosition: E
+      Target: DLQ
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: BillingQueue
+      SourcePosition: E
+      Target: DLQ
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+    
+    # API Gateway -> GET Lambdas
+    - Source: APIGateway
+      SourcePosition: S
+      Target: GetOrders
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetLeft:
+          Title: "GET"
+    
+    - Source: APIGateway
+      SourcePosition: S
+      Target: GetInventory
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: APIGateway
+      SourcePosition: S
+      Target: GetNotifications
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: APIGateway
+      SourcePosition: S
+      Target: GetBilling
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: APIGateway
+      SourcePosition: S
+      Target: GetDashboard
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    # GET Lambdas -> Tables
+    - Source: GetOrders
+      SourcePosition: S
+      Target: OrdersTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: GetInventory
+      SourcePosition: S
+      Target: InventoryTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: GetNotifications
+      SourcePosition: S
+      Target: NotificationsTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: GetBilling
+      SourcePosition: S
+      Target: BillingTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    # Dashboard -> All Tables
+    - Source: GetDashboard
+      SourcePosition: S
+      Target: OrdersTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: GetDashboard
+      SourcePosition: S
+      Target: InventoryTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: GetDashboard
+      SourcePosition: S
+      Target: NotificationsTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+    
+    - Source: GetDashboard
+      SourcePosition: S
+      Target: BillingTable
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
