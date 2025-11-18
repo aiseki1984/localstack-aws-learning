@@ -1,6 +1,7 @@
 'use client';
 
 import { useOrders } from '@/lib/hooks/useOrders';
+import Link from 'next/link';
 
 export default function OrdersPage() {
   const { orders, count, isLoading, isError } = useOrders();
@@ -30,6 +31,11 @@ export default function OrdersPage() {
             Total: {count} {count === 1 ? 'order' : 'orders'}
           </p>
         </div>
+        <Link href="/orders/new">
+          <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+            Create New Order
+          </button>
+        </Link>
       </div>
 
       {orders.length === 0 ? (
