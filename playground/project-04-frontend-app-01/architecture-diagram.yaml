@@ -29,7 +29,7 @@ Diagram:
       Title: todo-app-bucket
     
     MainFlow:
-      Type: AWS::Diagram::HorizontalStack
+      Type: AWS::Diagram::VerticalStack
       Children:
         - APIGateway
         - LambdaStack
@@ -40,7 +40,7 @@ Diagram:
       Title: Todo API
     
     LambdaStack:
-      Type: AWS::Diagram::VerticalStack
+      Type: AWS::Diagram::HorizontalStack
       Children:
         - GetTodosLambda
         - CreateTodoLambda
@@ -93,9 +93,9 @@ Diagram:
     
     # API Gateway -> Lambda Functions
     - Source: APIGateway
-      SourcePosition: E
+      SourcePosition: S
       Target: GetTodosLambda
-      TargetPosition: W
+      TargetPosition: N
       TargetArrowHead:
         Type: Open
       Labels:
@@ -103,9 +103,9 @@ Diagram:
           Title: "GET /todos"
     
     - Source: APIGateway
-      SourcePosition: E
+      SourcePosition: S
       Target: CreateTodoLambda
-      TargetPosition: W
+      TargetPosition: N
       TargetArrowHead:
         Type: Open
       Labels:
@@ -113,9 +113,9 @@ Diagram:
           Title: "POST /todos"
     
     - Source: APIGateway
-      SourcePosition: E
+      SourcePosition: S
       Target: UpdateTodoLambda
-      TargetPosition: W
+      TargetPosition: N
       TargetArrowHead:
         Type: Open
       Labels:
@@ -123,9 +123,9 @@ Diagram:
           Title: "PUT /todos/{id}"
     
     - Source: APIGateway
-      SourcePosition: E
+      SourcePosition: S
       Target: DeleteTodoLambda
-      TargetPosition: W
+      TargetPosition: N
       TargetArrowHead:
         Type: Open
       Labels:
@@ -134,43 +134,43 @@ Diagram:
     
     # Lambda -> DynamoDB
     - Source: GetTodosLambda
-      SourcePosition: E
+      SourcePosition: S
       Target: DynamoDB
-      TargetPosition: NNW
+      TargetPosition: N
       TargetArrowHead:
         Type: Open
-      Type: orthogonal
-      Labels:
-        TargetLeft:
-          Title: "Scan"
+      # Type: orthogonal
+      # Labels:
+      #   TargetLeft:
+      #     Title: "Scan"
     
     - Source: CreateTodoLambda
-      SourcePosition: E
+      SourcePosition: S
       Target: DynamoDB
-      TargetPosition: W
+      TargetPosition: N
       TargetArrowHead:
         Type: Open
-      Labels:
-        TargetLeft:
-          Title: "PutItem"
+      # Labels:
+      #   TargetLeft:
+      #     Title: "PutItem"
     
     - Source: UpdateTodoLambda
-      SourcePosition: E
+      SourcePosition: S
       Target: DynamoDB
-      TargetPosition: W
+      TargetPosition: N
       TargetArrowHead:
         Type: Open
-      Labels:
-        TargetRight:
-          Title: "UpdateItem"
+      # Labels:
+      #   TargetRight:
+      #     Title: "UpdateItem"
     
     - Source: DeleteTodoLambda
-      SourcePosition: E
+      SourcePosition: S
       Target: DynamoDB
-      TargetPosition: SSW
+      TargetPosition: N
       TargetArrowHead:
         Type: Open
-      Type: orthogonal
-      Labels:
-        TargetRight:
-          Title: "DeleteItem"
+      # Type: orthogonal
+      # Labels:
+      #   TargetRight:
+      #     Title: "DeleteItem"
