@@ -1,0 +1,176 @@
+Diagram:
+  DefinitionFiles:
+    - Type: URL
+      Url: https://raw.githubusercontent.com/awslabs/diagram-as-code/main/definitions/definition-for-aws-icons-light.yaml
+  
+  Resources:
+    Canvas:
+      Type: AWS::Diagram::Canvas
+      Direction: vertical
+      Children:
+        - User
+        - AWSCloud
+    
+    User:
+      Type: AWS::Diagram::Resource
+      Preset: User
+      Title: Web Browser
+    
+    AWSCloud:
+      Type: AWS::Diagram::Cloud
+      Preset: AWSCloudNoLogo
+      Direction: vertical
+      Children:
+        - S3Bucket
+        - MainFlow
+    
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Title: todo-app-bucket
+    
+    MainFlow:
+      Type: AWS::Diagram::HorizontalStack
+      Children:
+        - APIGateway
+        - LambdaStack
+        - DynamoDB
+    
+    APIGateway:
+      Type: AWS::ApiGateway::RestApi
+      Title: Todo API
+    
+    LambdaStack:
+      Type: AWS::Diagram::VerticalStack
+      Children:
+        - GetTodosLambda
+        - CreateTodoLambda
+        - UpdateTodoLambda
+        - DeleteTodoLambda
+    
+    GetTodosLambda:
+      Type: AWS::Lambda::Function
+      Title: Get Todos
+    
+    CreateTodoLambda:
+      Type: AWS::Lambda::Function
+      Title: Create Todo
+    
+    UpdateTodoLambda:
+      Type: AWS::Lambda::Function
+      Title: Update Todo
+    
+    DeleteTodoLambda:
+      Type: AWS::Lambda::Function
+      Title: Delete Todo
+    
+    DynamoDB:
+      Type: AWS::DynamoDB::Table
+      Title: TodoTable
+  
+  Links:
+    # User -> S3
+    - Source: User
+      SourcePosition: S
+      Target: S3Bucket
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        SourceRight:
+          Title: "Static Site"
+    
+    # S3 -> API Gateway
+    - Source: S3Bucket
+      SourcePosition: S
+      Target: APIGateway
+      TargetPosition: N
+      TargetArrowHead:
+        Type: Open
+      Type: orthogonal
+      Labels:
+        SourceRight:
+          Title: "API Calls"
+    
+    # API Gateway -> Lambda Functions
+    - Source: APIGateway
+      SourcePosition: E
+      Target: GetTodosLambda
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetLeft:
+          Title: "GET /todos"
+    
+    - Source: APIGateway
+      SourcePosition: E
+      Target: CreateTodoLambda
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetLeft:
+          Title: "POST /todos"
+    
+    - Source: APIGateway
+      SourcePosition: E
+      Target: UpdateTodoLambda
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetLeft:
+          Title: "PUT /todos/{id}"
+    
+    - Source: APIGateway
+      SourcePosition: E
+      Target: DeleteTodoLambda
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetLeft:
+          Title: "DELETE /todos/{id}"
+    
+    # Lambda -> DynamoDB
+    - Source: GetTodosLambda
+      SourcePosition: E
+      Target: DynamoDB
+      TargetPosition: NNW
+      TargetArrowHead:
+        Type: Open
+      Type: orthogonal
+      Labels:
+        TargetLeft:
+          Title: "Scan"
+    
+    - Source: CreateTodoLambda
+      SourcePosition: E
+      Target: DynamoDB
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetLeft:
+          Title: "PutItem"
+    
+    - Source: UpdateTodoLambda
+      SourcePosition: E
+      Target: DynamoDB
+      TargetPosition: W
+      TargetArrowHead:
+        Type: Open
+      Labels:
+        TargetRight:
+          Title: "UpdateItem"
+    
+    - Source: DeleteTodoLambda
+      SourcePosition: E
+      Target: DynamoDB
+      TargetPosition: SSW
+      TargetArrowHead:
+        Type: Open
+      Type: orthogonal
+      Labels:
+        TargetRight:
+          Title: "DeleteItem"

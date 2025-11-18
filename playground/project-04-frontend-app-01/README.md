@@ -2,11 +2,26 @@
 
 CDK を使用して、フルスタックの Todo アプリケーションを構築します。
 
-## 構成
+## 🏗️ アーキテクチャ図
+
+![Architecture Diagram](./architecture-diagram.png)
+
+**システム構成:**
 
 ```
-S3 (Next.js) → API Gateway → Lambda → DynamoDB
+Web Browser → S3 (Next.js Static Site) → API Gateway → Lambda (4 functions) → DynamoDB
 ```
+
+**コンポーネント:**
+
+- **S3**: Next.js 静的サイトホスティング
+- **API Gateway**: REST API エンドポイント（CORS 対応）
+- **Lambda Functions**:
+  - GET /todos - Todo 一覧取得
+  - POST /todos - Todo 作成
+  - PUT /todos/{id} - Todo 更新
+  - DELETE /todos/{id} - Todo 削除
+- **DynamoDB**: TodoTable でデータ永続化
 
 ## 要件定義
 
@@ -610,6 +625,46 @@ awslocal s3 sync frontend-nextjs/out/ s3://todo-app-bucket/
 ### 次のステップ
 
 このプロジェクトで学んだパターンを活用して、次の「投票アプリ」「チャットアプリ」に進みます！
+
+## 📐 アーキテクチャ図の生成
+
+このプロジェクトのアーキテクチャ図は、AWS Diagram-as-Code (awsdac) を使用して生成されています。
+
+### ファイル
+
+- `architecture-diagram.yaml` - Diagram-as-Code YAML 定義
+- `architecture-diagram.png` - 生成されたアーキテクチャ図
+
+### 図の再生成方法
+
+```bash
+# awsdac-mcp-serverを使用（推奨）
+# MCPツールから直接生成可能
+
+# または、awsdacをローカルにインストールして生成
+go install github.com/awslabs/diagram-as-code/cmd/awsdac@latest
+awsdac architecture-diagram.yaml -o architecture-diagram.png
+```
+
+### アーキテクチャの特徴
+
+**ユーザーアクションフロー（North → South）:**
+
+1. Web Browser（ユーザー）
+2. S3（静的サイト配信）
+3. API Gateway（REST API エンドポイント）
+4. Lambda Functions（ビジネスロジック）
+5. DynamoDB（データ永続化）
+
+**水平分離（East ↔ West）:**
+
+- Lambda 関数は機能ごとに分離（GET/POST/PUT/DELETE）
+- DynamoDB は単一テーブル設計
+
+**リンクラベル:**
+
+- HTTP メソッド + パス（例: `GET /todos`）
+- DynamoDB 操作（例: `Scan`, `PutItem`, `UpdateItem`, `DeleteItem`）
 
 ## Useful commands
 
