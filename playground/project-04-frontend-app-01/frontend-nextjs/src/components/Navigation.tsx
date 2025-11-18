@@ -15,34 +15,10 @@ export default function Navigation() {
           <ul className="hidden md:flex gap-6">
             <li>
               <Link
-                href="/"
+                href="/todos"
                 className="text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
               >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/about"
-                className="text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-              >
-                About
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/posts"
-                className="text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-              >
-                Posts
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                className="text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-              >
-                Contact
+                Todos
               </Link>
             </li>
           </ul>
@@ -91,38 +67,11 @@ export default function Navigation() {
           <ul className="md:hidden flex flex-col gap-4 mt-4 pb-4">
             <li>
               <Link
-                href="/"
+                href="/todos"
                 onClick={closeMenu}
                 className="block text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
               >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/about"
-                onClick={closeMenu}
-                className="block text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-              >
-                About
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/posts"
-                onClick={closeMenu}
-                className="block text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-              >
-                Posts
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                onClick={closeMenu}
-                className="block text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-              >
-                Contact
+                Todos
               </Link>
             </li>
           </ul>

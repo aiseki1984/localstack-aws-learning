@@ -1,34 +1,38 @@
-export interface Post {
-  userId: number;
-  id: number;
+// Todo型定義
+export interface Todo {
+  id: string;
   title: string;
-  body: string;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  address: {
-    street: string;
-    suite: string;
-    city: string;
-    zipcode: string;
-  };
-  phone: string;
-  website: string;
-  company: {
-    name: string;
-    catchPhrase: string;
-    bs: string;
-  };
+// APIレスポンス型定義
+export interface GetTodosResponse {
+  todos: Todo[];
 }
 
-export interface Comment {
-  postId: number;
-  id: number;
-  name: string;
-  email: string;
-  body: string;
+export interface CreateTodoRequest {
+  title: string;
+}
+
+export interface CreateTodoResponse {
+  todo: Todo;
+}
+
+export interface UpdateTodoRequest {
+  completed: boolean;
+}
+
+export interface UpdateTodoResponse {
+  todo: Todo;
+}
+
+export interface DeleteTodoResponse {
+  message: string;
+}
+
+export interface ApiError {
+  message: string;
+  error?: string;
 }
