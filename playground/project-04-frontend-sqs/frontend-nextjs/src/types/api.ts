@@ -59,19 +59,27 @@ export interface BillingRecord {
   billingId: string;
   orderId: string;
   customerId: string;
-  customerEmail: string;
   subtotal: number;
   tax: number;
-  totalAmount: number;
-  items: OrderItem[];
+  total: number;
+  taxRate: number;
+  items: Array<{
+    productId: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    subtotal: number;
+  }>;
   status: string;
+  paymentMethod: string | null;
+  paidAt: string | null;
   createdAt: string;
 }
 
 export interface BillingResponse {
   billingRecords: BillingRecord[];
   count: number;
-  totalAmount: number;
+  totalAmount: number; // 全請求レコードの合計
 }
 
 // ダッシュボード関連

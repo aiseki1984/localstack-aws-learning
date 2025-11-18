@@ -53,12 +53,12 @@ export default function BillingPage() {
                     Order: {record.orderId.slice(0, 8)}...
                   </p>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Customer: {record.customerEmail}
+                    Customer: {record.customerId}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                    ¥{record.totalAmount.toLocaleString()}
+                    ¥{record.total.toLocaleString()}
                   </p>
                   <span
                     className={`inline-block mt-2 px-2 py-1 text-xs font-semibold rounded-full ${
@@ -84,7 +84,7 @@ export default function BillingPage() {
                         {item.productName} x {item.quantity}
                       </span>
                       <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                        ¥{(item.price * item.quantity).toLocaleString()}
+                        ¥{item.subtotal.toLocaleString()}
                       </span>
                     </div>
                   ))}
@@ -98,7 +98,9 @@ export default function BillingPage() {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-zinc-600 dark:text-zinc-400">Tax (10%):</span>
+                    <span className="text-zinc-600 dark:text-zinc-400">
+                      Tax ({Math.round(record.taxRate * 100)}%):
+                    </span>
                     <span className="font-medium text-zinc-900 dark:text-zinc-100">
                       ¥{record.tax.toLocaleString()}
                     </span>
@@ -106,7 +108,7 @@ export default function BillingPage() {
                   <div className="flex justify-between text-base font-bold pt-2 border-t border-zinc-200 dark:border-zinc-800">
                     <span className="text-zinc-900 dark:text-zinc-100">Total:</span>
                     <span className="text-zinc-900 dark:text-zinc-100">
-                      ¥{record.totalAmount.toLocaleString()}
+                      ¥{record.total.toLocaleString()}
                     </span>
                   </div>
                 </div>
