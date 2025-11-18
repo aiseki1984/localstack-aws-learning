@@ -42,6 +42,7 @@ export function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
 
   return (
     <div
+      data-testid={`todo-item-${todo.id}`}
       className={`flex items-center gap-3 p-4 border rounded-lg transition-all ${
         isDeleting ? 'opacity-50' : ''
       } ${
@@ -51,6 +52,7 @@ export function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
       }`}
     >
       <input
+        data-testid={`todo-checkbox-${todo.id}`}
         type="checkbox"
         checked={todo.completed}
         onChange={handleToggle}
@@ -59,6 +61,7 @@ export function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
       />
       <div className="flex-1 min-w-0">
         <p
+          data-testid={`todo-title-${todo.id}`}
           className={`text-sm font-medium ${
             todo.completed
               ? 'line-through text-gray-500 dark:text-gray-400'
@@ -72,6 +75,7 @@ export function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
         </p>
       </div>
       <button
+        data-testid={`todo-delete-${todo.id}`}
         onClick={handleDelete}
         disabled={isDeleting}
         className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50"
