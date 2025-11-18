@@ -122,63 +122,68 @@ Todo {
 
 **API エンドポイント:** `https://rpreopc65q.execute-api.localhost.localstack.cloud:4566/prod/`
 
-### Phase 2: フロントエンド実装 (Next.js)
+### Phase 2: フロントエンド実装 (Next.js) ✅
 
-#### Step 2-1: 環境設定
+#### Step 2-1: 環境設定 ✅
 
-- [ ] `.env.local` に API エンドポイントを設定
-- [ ] API クライアント関数を作成
+- [x] `.env.local` に API エンドポイントを設定
+- [x] API クライアント関数を作成（`lib/api/todoApi.ts`）
 
-#### Step 2-2: UI コンポーネント作成
+#### Step 2-2: UI コンポーネント作成 ✅
 
-- [ ] `TodoList` コンポーネント - 一覧表示
-- [ ] `TodoItem` コンポーネント - 個別 Todo
-- [ ] `TodoForm` コンポーネント - 新規作成フォーム
+- [x] `TodoList` コンポーネント - 一覧表示
+- [x] `TodoItem` コンポーネント - 個別 Todo（`data-testid`属性付き）
+- [x] `TodoForm` コンポーネント - 新規作成フォーム
 
-#### Step 2-3: 状態管理
+#### Step 2-3: 状態管理 ✅
 
-- [ ] Todo 一覧の状態管理（useState または Zustand）
-- [ ] API 呼び出しとローディング状態
-- [ ] エラーハンドリング
+- [x] SWR で Todo 一覧の状態管理
+- [x] API 呼び出しとローディング状態
+- [x] エラーハンドリング
 
-#### Step 2-4: API 統合
+#### Step 2-4: API 統合 ✅
 
-- [ ] フェッチ処理の実装
-- [ ] CRUD 操作の実装
-- [ ] 楽観的更新の実装（オプション）
+- [x] フェッチ処理の実装
+- [x] CRUD 操作の実装
+- [x] **楽観的更新の実装**（SWR の mutate 機能）
 
-#### Step 2-5: スタイリング
+#### Step 2-5: スタイリング ✅
 
-- [ ] Tailwind CSS でスタイリング
-- [ ] レスポンシブ対応
-- [ ] ダークモード対応（既存の ThemeProvider を活用）
+- [x] Tailwind CSS でスタイリング
+- [x] レスポンシブ対応
+- [x] ダークモード対応（既存の ThemeProvider を活用）
 
-### Phase 3: デプロイと動作確認
+### Phase 3: デプロイと動作確認 ✅
 
-#### Step 3-1: ビルドとデプロイ
+#### Step 3-1: ビルドとデプロイ ✅
 
-- [ ] Next.js アプリをビルド
-- [ ] S3 にアップロード（`awslocal s3 sync`）
-- [ ] ブラウザで動作確認
+- [x] Next.js アプリをビルド
+- [x] S3 にアップロード（`./scripts/deploy-frontend.sh`）
+- [x] ブラウザで動作確認
 
-#### Step 3-2: 統合テスト
+#### Step 3-2: 統合テスト（Playwright E2E） ✅
 
-- [ ] Todo 作成のテスト
-- [ ] Todo 一覧表示のテスト
-- [ ] Todo 完了/未完了の切り替えテスト
-- [ ] Todo 削除のテスト
+- [x] Todo 作成のテスト
+- [x] Todo 一覧表示のテスト
+- [x] Todo 完了/未完了の切り替えテスト
+- [x] Todo 削除のテスト
+- [x] ページリロード時の永続化テスト
+- [x] 空 Todo のバリデーションテスト
+- [x] 完了数カウンターのテスト
 
-#### Step 3-3: エラーケーステスト
+**全 7 テストが成功！** 🎉
 
-- [ ] ネットワークエラー時の挙動
-- [ ] 不正なデータ入力時の挙動
-- [ ] API エラー時のユーザーフィードバック
+#### Step 3-3: エラーケーステスト ✅
 
-### Phase 4: 学習の振り返り
+- [x] ネットワークエラー時の挙動（アラート表示）
+- [x] 不正なデータ入力時の挙動（ボタン無効化）
+- [x] API エラー時のユーザーフィードバック（再試行ボタン）
 
-- [ ] README に学習内容をまとめる
-- [ ] 躓いたポイントと解決方法を記録
-- [ ] 次のプロジェクト（投票アプリ）への改善点を洗い出し
+### Phase 4: 学習の振り返り ✅
+
+- [x] README に学習内容をまとめる
+- [x] 躓いたポイントと解決方法を記録
+- [x] 次のプロジェクト（投票アプリ）への改善点を洗い出し
 
 ## プロジェクト構成
 
@@ -191,48 +196,190 @@ project-04-frontend-app-01/
 │       ├── getTodos.ts      # 一覧取得
 │       ├── createTodo.ts    # 作成
 │       ├── updateTodo.ts    # 更新
-│       └── deleteTodo.ts    # 削除
+│       ├── deleteTodo.ts    # 削除
+│       └── package.json     # AWS SDK依存関係
 ├── frontend-nextjs/
 │   ├── src/
 │   │   ├── app/
+│   │   │   ├── page.tsx            # ルートページ（/todosへリダイレクト）
 │   │   │   └── todos/
-│   │   │       └── page.tsx
+│   │   │       └── page.tsx        # Todosメインページ
 │   │   ├── components/
-│   │   │   ├── TodoList.tsx
-│   │   │   ├── TodoItem.tsx
-│   │   │   └── TodoForm.tsx
-│   │   └── lib/
-│   │       └── api.ts       # API クライアント
-│   └── out/                  # ビルド成果物
+│   │   │   ├── TodoList.tsx        # Todo一覧コンテナ
+│   │   │   ├── TodoItem.tsx        # 個別Todo（data-testid付き）
+│   │   │   ├── TodoForm.tsx        # 作成フォーム
+│   │   │   └── Navigation.tsx      # ナビゲーション
+│   │   ├── lib/
+│   │   │   ├── api/
+│   │   │   │   └── todoApi.ts      # APIクライアント（Singleton）
+│   │   │   └── hooks/
+│   │   │       └── useTodos.ts     # SWRカスタムフック
+│   │   ├── store/
+│   │   │   └── useTodoStore.ts     # Zustand（現在未使用）
+│   │   └── types/
+│   │       └── api.ts              # TypeScript型定義
+│   ├── tests/
+│   │   └── e2e/
+│   │       └── todo.spec.ts        # Playwright E2Eテスト
+│   ├── playwright.config.ts        # Playwrightテスト設定
+│   ├── out/                         # ビルド成果物
+│   └── package.json
+├── scripts/
+│   ├── deploy-frontend.sh          # S3デプロイスクリプト
+│   └── build-and-deploy.sh         # ビルド+デプロイ一括実行
+├── api-test.http                    # VS Code REST Client用テストファイル
 └── README.md
 ```
 
 ## 学習ポイント
 
-### CORS 設定
+### 1. CORS 設定
 
-LocalStack や AWS では、フロントエンド(S3)と API Gateway 間の通信に CORS 設定が必須です。API Gateway で適切な CORS ヘッダーを設定します。
+LocalStack や AWS では、フロントエンド(S3)と API Gateway 間の通信に CORS 設定が必須です。
 
-### DynamoDB の基本操作
+```typescript
+// CDKでのCORS設定例
+const api = new apigateway.RestApi(this, 'TodoApi', {
+  defaultCorsPreflightOptions: {
+    allowOrigins: apigateway.Cors.ALL_ORIGINS,
+    allowMethods: apigateway.Cors.ALL_METHODS,
+  },
+});
+```
 
-- `PutItem` - データの作成
-- `GetItem` / `Scan` - データの取得
-- `UpdateItem` - データの更新
-- `DeleteItem` - データの削除
+### 2. DynamoDB の基本操作（AWS SDK v3）
 
-### Lambda と API Gateway の統合
+```typescript
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import {
+  DynamoDBDocumentClient,
+  ScanCommand,
+  PutCommand,
+  UpdateCommand,
+  DeleteCommand,
+} from '@aws-sdk/lib-dynamodb';
 
-既に lambda/todos/ にひな型は作ってあるので、適宜改変する。
+// クライアント初期化
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
 
-- Lambda プロキシ統合の理解
-- イベントオブジェクトの構造
-- レスポンスフォーマット（statusCode, headers, body）
+// Scan - 全件取得
+await docClient.send(new ScanCommand({ TableName: 'TodoTable' }));
 
-### Next.js での API 呼び出し
+// Put - 作成
+await docClient.send(new PutCommand({ TableName: 'TodoTable', Item: todo }));
 
-- クライアントサイドでのデータフェッチ
-- `use client` ディレクティブの使用
-- エラーハンドリングとローディング状態
+// Update - 更新
+await docClient.send(
+  new UpdateCommand({
+    TableName: 'TodoTable',
+    Key: { id },
+    UpdateExpression: 'set completed = :completed',
+    ExpressionAttributeValues: { ':completed': true },
+  })
+);
+
+// Delete - 削除
+await docClient.send(
+  new DeleteCommand({ TableName: 'TodoTable', Key: { id } })
+);
+```
+
+### 3. Lambda と API Gateway の統合
+
+**重要な学び:**
+
+- LocalStack では環境変数`AWS_ENDPOINT_URL`を明示的に設定する必要はない（自動設定される）
+- Lambda プロキシ統合では、レスポンスに`statusCode`、`headers`、`body`が必須
+- エラーハンドリングでは適切な HTTP ステータスコードを返す
+
+```typescript
+// Lambda関数のレスポンス形式
+return {
+  statusCode: 200,
+  headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  },
+  body: JSON.stringify({ todos }),
+};
+```
+
+### 4. Next.js での API 呼び出しと SWR
+
+**SWR による楽観的更新:**
+
+```typescript
+const { data, mutate } = useSWR('/todos', () => todoApi.getTodos());
+
+// 楽観的更新: ローカルキャッシュを即座に更新
+await mutate(
+  updatedTodos,
+  { revalidate: false } // サーバーに問い合わせない
+);
+
+// API呼び出し後にサーバーから最新データを取得
+await todoApi.updateTodo(id, { completed });
+await mutate(); // 再検証
+```
+
+**学んだこと:**
+
+- Zustand + SWR の二重管理は不要（SWR 単体で十分）
+- `revalidate: false`でチラつき防止
+- エラー時は自動ロールバック
+
+### 5. Playwright E2E テストのベストプラクティス
+
+**`data-testid`属性の重要性:**
+
+```tsx
+// コンポーネント側
+<div data-testid={`todo-item-${todo.id}`}>
+  <input data-testid={`todo-checkbox-${todo.id}`} />
+</div>;
+
+// テスト側
+const todoItem = page
+  .locator('[data-testid^="todo-item-"]')
+  .filter({ hasText: todoTitle });
+const checkbox = todoItem.locator('[data-testid^="todo-checkbox-"]');
+```
+
+**LocalStack 特有の設定:**
+
+- `timeout: 60000` - LocalStack は応答が遅いため
+- `workers: 1` - 並列実行を避けて安定性向上
+- `retries: 1` - 一時的なエラーに対応
+
+### 6. LocalStack の制限と回避策
+
+**BucketDeployment が動作しない:**
+
+```bash
+# CDKのBucketDeploymentは使えない
+# 代わりに手動スクリプトを使用
+./scripts/deploy-frontend.sh
+```
+
+**DynamoDB のデータがテスト間で残る:**
+
+- テストは冪等性を意識
+- カウンター系のテストは絶対値ではなくパターンマッチで検証
+
+### 7. プロジェクト構成のベストプラクティス
+
+**推奨:**
+
+- インフラ（CDK）とフロントエンドは同じリポジトリ内で管理（モノレポ）
+- スクリプトで自動化（`build-and-deploy.sh`）
+- TypeScript 型定義を共有（`types/api.ts`）
+
+**本番環境では:**
+
+- インフラとフロントエンドを分離したリポジトリに
+- CI/CD パイプラインで自動デプロイ
+- 環境変数管理（AWS Systems Manager Parameter Store 等）
 
 ## API テスト方法
 
@@ -311,13 +458,187 @@ awslocal dynamodb scan --table-name TodoTable
 awslocal s3 ls s3://todo-app-bucket --recursive
 ```
 
+## 躓いたポイントと解決方法
+
+### 問題 1: Lambda 関数が DynamoDB に接続できない
+
+**エラー:** `ECONNREFUSED 127.0.0.1:4566`
+
+**原因:** Lambda 関数の環境変数に`AWS_ENDPOINT_URL`を明示的に設定していた
+
+**解決策:** LocalStack は自動的にエンドポイントを設定するため、環境変数を削除
+
+```typescript
+// ❌ 削除前
+const fn = new lambda.Function(this, 'GetTodos', {
+  environment: {
+    AWS_ENDPOINT_URL: 'http://localhost:4566', // これが原因
+  },
+});
+
+// ✅ 削除後
+const fn = new lambda.Function(this, 'GetTodos', {
+  environment: {
+    TABLE_NAME: table.tableName, // 必要な環境変数のみ
+  },
+});
+```
+
+### 問題 2: チェックボックスのチラつき
+
+**現象:** チェックボックスをクリックすると、UI が一瞬チラつく
+
+**原因:**
+
+- Zustand と SWR で二重に状態管理
+- `optimisticTodos`をクリアするタイミングで SWR データに切り替わる
+
+**解決策:** SWR の`mutate`機能で楽観的更新を実装
+
+```typescript
+// ❌ Before: Zustand + SWRの二重管理
+const optimisticTodos = useTodoStore((state) => state.optimisticTodos);
+return { todos: optimisticTodos ?? data ?? [] };
+
+// ✅ After: SWRのみで管理
+await mutate(updatedTodos, { revalidate: false }); // 即座に更新
+await todoApi.updateTodo(id, { completed }); // API呼び出し
+await mutate(); // 再検証
+```
+
+### 問題 3: Playwright テストでセレクタが複数要素にマッチ
+
+**エラー:** `strict mode violation: resolved to 23 elements`
+
+**原因:**
+
+- 前のテストで作成した Todo が残っている
+- テキストベースのセレクタが複数の要素にマッチ
+
+**解決策:** `data-testid`属性を追加
+
+```tsx
+// コンポーネントに一意な識別子を追加
+<div data-testid={`todo-item-${todo.id}`}>
+  <input data-testid={`todo-checkbox-${todo.id}`} />
+  <button data-testid={`todo-delete-${todo.id}`}>削除</button>
+</div>
+```
+
+### 問題 4: LocalStack で BucketDeployment が動作しない
+
+**エラー:** デプロイは成功するが、S3 に何もアップロードされない
+
+**原因:** LocalStack の制限
+
+**解決策:** デプロイスクリプトを作成
+
+```bash
+#!/bin/bash
+# scripts/deploy-frontend.sh
+awslocal s3 rm s3://todo-app-bucket --recursive
+awslocal s3 sync frontend-nextjs/out/ s3://todo-app-bucket/
+```
+
+## 次のプロジェクトへの改善点
+
+### 技術選定
+
+1. **状態管理は SWR 単体で十分** - Zustand は不要（複雑なアプリでは併用も可）
+2. **Playwright は強力** - LocalStack でも十分動作する
+3. **data-testid 属性は最初から** - 後から追加すると手間
+
+### アーキテクチャ
+
+1. **API 設計を先に固める** - 型定義から始めると開発がスムーズ
+2. **環境変数管理を統一** - `.env.local`と`.env.example`を用意
+3. **デプロイスクリプトを最初に作る** - 開発中も頻繁に使う
+
+### テスト
+
+1. **E2E テストは最小限に** - 重要なユーザーフローのみ
+2. **API テストも書く** - Lambda の単体テストは必須
+3. **テストデータのクリーンアップ** - beforeEach/afterEach で管理
+
+## 成果物
+
+### 動作する URL
+
+- **フロントエンド:** http://todo-app-bucket.s3.localhost.localstack.cloud:4566/index.html
+- **API:** https://rpreopc65q.execute-api.localhost.localstack.cloud:4566/prod/todos
+
+### テスト結果
+
+```bash
+✅ 全7テスト成功 (13.4s)
+  - ページタイトルが正しく表示される
+  - Todoを作成できる
+  - Todoを完了状態に変更できる
+  - Todoを削除できる
+  - 完了数が正しく表示される
+  - 空のTodoは作成できない
+  - ページをリロードしてもTodoが保持される
+```
+
+### 実装機能
+
+- ✅ Todo CRUD（作成・読取・更新・削除）
+- ✅ 楽観的更新（UI の即座な反応）
+- ✅ エラーハンドリング（再試行ボタン付き）
+- ✅ ローディング状態表示
+- ✅ レスポンシブデザイン
+- ✅ ダークモード対応
+- ✅ E2E テスト完備
+
+## まとめ
+
+### 学んだこと
+
+1. **CDK + LocalStack での開発フロー** - 本番に近い環境で開発可能
+2. **AWS SDK v3 の使い方** - DynamoDB 操作の基本
+3. **Next.js App Router の実践** - Server/Client Component の使い分け
+4. **SWR による状態管理** - 楽観的更新の実装
+5. **Playwright による自動テスト** - E2E テストの重要性
+
+### 所要時間
+
+- Phase 1（インフラ）: 約 2 時間
+- Phase 2（フロントエンド）: 約 3 時間
+- Phase 3（テスト）: 約 2 時間
+- **合計: 約 7 時間**
+
+### 次のステップ
+
+このプロジェクトで学んだパターンを活用して、次の「投票アプリ」「チャットアプリ」に進みます！
+
 ## Useful commands
 
-- `npm run build` - TypeScript をコンパイル
-- `npm run watch` - ファイル変更を監視してコンパイル
-- `npm run test` - Jest テストを実行
+### CDK
+
 - `cdklocal bootstrap` - CDK 環境をブートストラップ
 - `cdklocal deploy` - スタックをデプロイ
 - `cdklocal destroy` - スタックを削除
 - `cdklocal diff` - デプロイ済みスタックとの差分を確認
 - `cdklocal synth` - CloudFormation テンプレートを生成
+
+### Lambda
+
+- `cd lambda/todos && npm run build` - Lambda 関数をビルド
+
+### Frontend
+
+- `cd frontend-nextjs && npm run build` - Next.js アプリをビルド
+- `cd frontend-nextjs && npm run dev` - 開発サーバー起動
+- `cd frontend-nextjs && npm run test:e2e` - E2E テスト実行
+- `cd frontend-nextjs && npm run test:e2e:ui` - E2E テスト UI モード
+
+### Deploy
+
+- `./scripts/build-and-deploy.sh` - ビルド+デプロイ一括実行
+- `./scripts/deploy-frontend.sh` - フロントエンドのみデプロイ
+
+### AWS CLI (LocalStack)
+
+- `awslocal dynamodb scan --table-name TodoTable` - DynamoDB 全件取得
+- `awslocal s3 ls s3://todo-app-bucket --recursive` - S3 バケット内容確認
+- `awslocal apigateway get-rest-apis` - API Gateway 一覧
