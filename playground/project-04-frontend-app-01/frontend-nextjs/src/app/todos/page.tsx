@@ -2,11 +2,8 @@
 
 import { TodoForm } from '@/components/TodoForm';
 import { TodoList } from '@/components/TodoList';
-import { useTodos } from '@/lib/hooks/useTodos';
 
 export default function TodosPage() {
-  const { mutate } = useTodos();
-
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-3xl mx-auto">
@@ -19,7 +16,7 @@ export default function TodosPage() {
           </p>
         </header>
 
-        <TodoForm onSuccess={() => mutate()} />
+        <TodoForm />
         <TodoList />
       </div>
     </div>

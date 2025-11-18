@@ -4,7 +4,7 @@ import { TodoItem } from './TodoItem';
 import { useTodos } from '@/lib/hooks/useTodos';
 
 export function TodoList() {
-  const { todos, isLoading, isError, mutate } = useTodos();
+  const { todos, isLoading, isError, updateTodoOptimistic, deleteTodoOptimistic } = useTodos();
 
   if (isLoading) {
     return (
@@ -21,7 +21,7 @@ export function TodoList() {
           Todoの読み込みに失敗しました
         </p>
         <button
-          onClick={() => mutate()}
+          onClick={() => window.location.reload()}
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           再試行
@@ -48,13 +48,13 @@ export function TodoList() {
       <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
         {completedCount} / {totalCount} 完了
       </div>
-      <div className="space-y-2">
+            <div className="space-y-2">
         {todos.map((todo) => (
           <TodoItem
             key={todo.id}
             todo={todo}
-            todos={todos}
-            onUpdate={() => mutate()}
+            onUpdate={updateTodoOptimistic}
+            onDelete={deleteTodoOptimistic}
           />
         ))}
       </div>

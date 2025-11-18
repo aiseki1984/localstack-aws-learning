@@ -2,25 +2,21 @@
 
 import { useState } from 'react';
 import { Todo } from '@/types/api';
-import { useTodoStore } from '@/store/useTodoStore';
 
 interface TodoItemProps {
   todo: Todo;
-  todos: Todo[];
-  onUpdate: () => void;
+  onUpdate: (id: string, completed: boolean) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
 
-export function TodoItem({ todo, todos, onUpdate }: TodoItemProps) {
+export function TodoItem({ todo, onUpdate, onDelete }: TodoItemProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  const updateTodo = useTodoStore((state) => state.updateTodoOptimistic);
-  const deleteTodo = useTodoStore((state) => state.deleteTodoOptimistic);
 
   const handleToggle = async () => {
     setIsUpdating(true);
     try {
-      await updateTodo(todo.id, !todo.completed, todos, onUpdate);
+      await onUpdate(todo.id, !todo.completed);
     } catch (error) {
       console.error('Failed to update todo:', error);
       alert('Todoの更新に失敗しました');
@@ -36,7 +32,7 @@ export function TodoItem({ todo, todos, onUpdate }: TodoItemProps) {
 
     setIsDeleting(true);
     try {
-      await deleteTodo(todo.id, todos, onUpdate);
+      await onDelete(todo.id);
     } catch (error) {
       console.error('Failed to delete todo:', error);
       alert('Todoの削除に失敗しました');

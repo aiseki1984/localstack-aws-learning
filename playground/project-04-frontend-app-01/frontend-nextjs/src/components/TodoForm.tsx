@@ -1,16 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useTodoStore } from '@/store/useTodoStore';
+import { useTodos } from '@/lib/hooks/useTodos';
 
-interface TodoFormProps {
-  onSuccess?: () => void;
-}
-
-export function TodoForm({ onSuccess }: TodoFormProps) {
+export function TodoForm() {
   const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const createTodo = useTodoStore((state) => state.createTodoOptimistic);
+  const { createTodo } = useTodos();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +17,8 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
 
     setIsSubmitting(true);
     try {
-      await createTodo(title, () => {
-        setTitle('');
-        onSuccess?.();
-      });
+      await createTodo(title);
+      setTitle('');
     } catch (error) {
       console.error('Failed to create todo:', error);
       alert('Todoの作成に失敗しました');
