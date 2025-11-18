@@ -1,36 +1,26 @@
 {
-  "name": "lambda-api-gateway-posts",
+  "name": "todo-lambda-functions",
   "version": "1.0.0",
-  "description": "Lambda TypeScript + API Gateway CRUD API for posts",
-  "main": "dist/index.js",
+  "description": "Lambda functions for Todo application",
   "scripts": {
-    "test": "vitest run",
-    "dev": "tsc -w",
-    "build": "esbuild src/index.ts --bundle --minify --platform=node --target=es2020 --outfile=dist/index.js --external:@aws-sdk/*",
-    "typecheck": "tsc --noEmit",
-    "deploy": "cd .. && ./scripts/deploy.sh",
-    "cleanup": "cd .. && ./scripts/cleanup.sh",
-    "list-resources": "cd .. && ./scripts/list-resources.sh"
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "aws",
     "lambda",
-    "api-gateway",
-    "typescript",
-    "crud",
-    "posts"
+    "todo",
+    "dynamodb"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.705.0",
-    "@aws-sdk/lib-dynamodb": "^3.705.0"
+    "@aws-sdk/client-dynamodb": "^3.933.0",
+    "@aws-sdk/lib-dynamodb": "^3.933.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.156",
+    "@types/aws-lambda": "^8.10.158",
     "@types/node": "^24.9.1",
-    "esbuild": "^0.25.12",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.6"
+    "typescript": "^5.9.3"
   }
 }

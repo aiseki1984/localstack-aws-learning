@@ -1,0 +1,91 @@
+### Variables
+@baseUrl = https://rpreopc65q.execute-api.localhost.localstack.cloud:4566/prod
+@todoId = 2204da6d-d375-46b0-8838-f9c6e22c0741
+
+### Health Check (作成した最初のTodo IDを使用)
+
+### ========================================
+### GET - 全てのTodoを取得
+### ========================================
+GET {{baseUrl}}/todos
+Content-Type: application/json
+
+### ========================================
+### POST - 新しいTodoを作成
+### ========================================
+POST {{baseUrl}}/todos
+Content-Type: application/json
+
+{
+  "title": "Learn AWS CDK"
+}
+
+### ========================================
+### POST - 別のTodoを作成
+### ========================================
+POST {{baseUrl}}/todos
+Content-Type: application/json
+
+{
+  "title": "Build Serverless App"
+}
+
+### ========================================
+### POST - さらに別のTodoを作成
+### ========================================
+POST {{baseUrl}}/todos
+Content-Type: application/json
+
+{
+  "title": "Deploy to Production"
+}
+
+### ========================================
+### PUT - Todoを完了状態に更新
+### 注意: {{todoId}} を実際のTodo IDに置き換えてください
+### ========================================
+PUT {{baseUrl}}/todos/{{todoId}}
+Content-Type: application/json
+
+{
+  "completed": true
+}
+
+### ========================================
+### PUT - Todoを未完了状態に更新
+### ========================================
+PUT {{baseUrl}}/todos/{{todoId}}
+Content-Type: application/json
+
+{
+  "completed": false
+}
+
+### ========================================
+### DELETE - Todoを削除
+### 注意: {{todoId}} を実際のTodo IDに置き換えてください
+### ========================================
+DELETE {{baseUrl}}/todos/{{todoId}}
+
+### ========================================
+### エラーケーステスト
+### ========================================
+
+### POST - タイトルなしで作成（エラー）
+POST {{baseUrl}}/todos
+Content-Type: application/json
+
+{
+  "title": ""
+}
+
+### PUT - 存在しないIDで更新（エラーではないが、何も起こらない）
+PUT {{baseUrl}}/todos/non-existent-id
+Content-Type: application/json
+
+{
+  "completed": true
+}
+
+### DELETE - 存在しないIDで削除（エラーではないが、何も起こらない）
+DELETE {{baseUrl}}/todos/non-existent-id

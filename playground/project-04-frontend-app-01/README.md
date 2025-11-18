@@ -80,41 +80,47 @@ Todo {
 
 ### Phase 1: インフラ構築 (CDK)
 
-#### Step 1-1: DynamoDB テーブル作成
+#### Step 1-1: DynamoDB テーブル作成 ✅
 
-- [ ] `lib/project-04-frontend-app-01-stack.ts` に DynamoDB テーブルを定義
-- [ ] パーティションキー: `id` (String)
-- [ ] `removalPolicy: DESTROY` で開発環境設定
+- [x] `lib/project-04-frontend-app-01-stack.ts` に DynamoDB テーブルを定義
+- [x] パーティションキー: `id` (String)
+- [x] `removalPolicy: DESTROY` で開発環境設定
 
-#### Step 1-2: Lambda 関数作成
+#### Step 1-2: Lambda 関数作成 ✅
 
-- [ ] `lambda/todos/` ディレクトリを作成
-- [ ] CRUD 操作用の Lambda 関数を実装
-  - [ ] `getTodos.ts` - 一覧取得
-  - [ ] `createTodo.ts` - 作成
-  - [ ] `updateTodo.ts` - 更新
-  - [ ] `deleteTodo.ts` - 削除
-- [ ] DynamoDB SDK v3 を使用
+- [x] `lambda/todos/` ディレクトリを作成
+- [x] CRUD 操作用の Lambda 関数を実装
+  - [x] `getTodos.ts` - 一覧取得
+  - [x] `createTodo.ts` - 作成
+  - [x] `updateTodo.ts` - 更新
+  - [x] `deleteTodo.ts` - 削除
+- [x] DynamoDB SDK v3 を使用
 
-#### Step 1-3: API Gateway 作成
+#### Step 1-3: API Gateway 作成 ✅
 
-- [ ] REST API を作成
-- [ ] `/todos` リソースを作成
-- [ ] 各 HTTP メソッドと Lambda 関数を統合
-- [ ] CORS 設定を追加（重要！）
+- [x] REST API を作成
+- [x] `/todos` リソースを作成
+- [x] 各 HTTP メソッドと Lambda 関数を統合
+- [x] CORS 設定を追加（重要！）
 
-#### Step 1-4: S3 バケット作成
+#### Step 1-4: S3 バケット作成 ✅
 
-- [ ] 静的ホスティング用の S3 バケットを作成
-- [ ] パブリックアクセス設定
-- [ ] BucketDeployment 設定（LocalStack では手動アップロード）
+- [x] 静的ホスティング用の S3 バケットを作成
+- [x] パブリックアクセス設定
+- [x] BucketDeployment 設定（LocalStack では手動アップロード）
 
-#### Step 1-5: デプロイとテスト
+#### Step 1-5: デプロイとテスト ✅
 
-- [ ] `cdklocal bootstrap`
-- [ ] `cdklocal deploy`
-- [ ] API エンドポイント URL を確認
-- [ ] curl または Postman で API をテスト
+- [x] `cdklocal bootstrap`
+- [x] `cdklocal deploy`
+- [x] API エンドポイント URL を確認
+- [x] curl または VS Code REST Client で API をテスト
+  - [x] GET /todos - 一覧取得
+  - [x] POST /todos - 作成
+  - [x] PUT /todos/{id} - 更新
+  - [x] DELETE /todos/{id} - 削除
+
+**API エンドポイント:** `https://rpreopc65q.execute-api.localhost.localstack.cloud:4566/prod/`
 
 ### Phase 2: フロントエンド実装 (Next.js)
 
@@ -228,25 +234,81 @@ LocalStack や AWS では、フロントエンド(S3)と API Gateway 間の通�
 - `use client` ディレクティブの使用
 - エラーハンドリングとローディング状態
 
+## API テスト方法
+
+### 1. VS Code REST Client を使用（推奨）
+
+`api-test.http` ファイルを開いて、各リクエストの上にある「Send Request」をクリック
+
+### 2. curl コマンドを使用
+
+```bash
+# Todo一覧取得
+curl -X GET https://rpreopc65q.execute-api.localhost.localstack.cloud:4566/prod/todos
+
+# Todo作成
+curl -X POST https://rpreopc65q.execute-api.localhost.localstack.cloud:4566/prod/todos \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Learn CDK"}'
+
+# Todo更新（completed状態を変更）
+curl -X PUT https://rpreopc65q.execute-api.localhost.localstack.cloud:4566/prod/todos/{id} \
+  -H "Content-Type: application/json" \
+  -d '{"completed":true}'
+
+# Todo削除
+curl -X DELETE https://rpreopc65q.execute-api.localhost.localstack.cloud:4566/prod/todos/{id}
+```
+
+## デプロイコマンド
+
+### フロントエンドのデプロイ
+
+```bash
+# 方法1: ビルド+デプロイを一度に実行（推奨）
+./scripts/build-and-deploy.sh
+
+# 方法2: 既にビルド済みの場合、デプロイのみ
+./scripts/deploy-frontend.sh
+```
+
+**注意:** LocalStack では`BucketDeployment`が動作しないため、`cdklocal deploy`後に手動でスクリプトを実行する必要があります。
+
+### インフラのデプロイ
+
+```bash
+# 初回のみ: ブートストラップ
+cdklocal bootstrap
+
+# Lambda関数をビルド
+cd lambda/todos && npm run build && cd ../..
+
+# CDKスタックをデプロイ
+cdklocal deploy
+
+# フロントエンドをS3にアップロード（LocalStack用）
+./scripts/deploy-frontend.sh
+```
+
 ## Useful Commands
 
 ```bash
 # CDK
-cdklocal bootstrap
-cdklocal deploy
-cdklocal destroy
+cdklocal destroy          # スタックを削除
+cdklocal diff             # 変更差分を確認
+cdklocal synth            # CloudFormationテンプレートを生成
 
-# Next.js
+# Lambda関数のビルド
+cd lambda/todos && npm run build && cd ../..
+
+# Next.js（個別にビルド）
 cd frontend-nextjs && npm run build && cd ..
-
-# LocalStack用: 手動でS3にアップロード
-awslocal s3 sync ./frontend-nextjs/out s3://todo-app-bucket
 
 # DynamoDB テーブル確認
 awslocal dynamodb scan --table-name TodoTable
 
-# API テスト
-curl -X GET http://localhost:4566/restapis/<api-id>/local/_user_request_/todos
+# S3バケットの内容確認
+awslocal s3 ls s3://todo-app-bucket --recursive
 ```
 
 ## Useful commands
