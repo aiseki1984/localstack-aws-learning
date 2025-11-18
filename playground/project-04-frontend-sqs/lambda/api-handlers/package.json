@@ -1,0 +1,19 @@
+{
+  "name": "api-handlers",
+  "version": "1.0.0",
+  "description": "GET API Lambda handlers for E-commerce system",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.338.0",
+    "@aws-sdk/lib-dynamodb": "^3.338.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.115",
+    "@types/node": "^18.15.11",
+    "typescript": "^5.0.4"
+  }
+}

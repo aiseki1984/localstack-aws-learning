@@ -8,6 +8,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 
 export class Project03Cdk03Stack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -292,6 +293,168 @@ export class Project03Cdk03Stack extends cdk.Stack {
     billingTable.grantWriteData(billingServiceLambda);
 
     // ═══════════════════════════════════════════════════════
+    // 🪣 Phase 5: S3 Bucket for Frontend Hosting
+    // ═══════════════════════════════════════════════════════
+
+    const frontendBucket = new s3.Bucket(this, 'FrontendBucket', {
+      bucketName: 'ecommerce-frontend',
+      publicReadAccess: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
+      websiteIndexDocument: 'index.html',
+      websiteErrorDocument: 'index.html',
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // ⚡ Phase 5: GET API Lambda Functions
+    // ═══════════════════════════════════════════════════════
+
+    // 1️⃣ Get Orders Lambda
+    const getOrdersLambda = new lambdaNodejs.NodejsFunction(this, 'GetOrdersLambda', {
+      functionName: 'get-orders',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/api-handlers/src/get-orders.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        ORDERS_TABLE: ordersTable.tableName,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+    ordersTable.grantReadData(getOrdersLambda);
+
+    // 2️⃣ Get Inventory Lambda
+    const getInventoryLambda = new lambdaNodejs.NodejsFunction(this, 'GetInventoryLambda', {
+      functionName: 'get-inventory',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/api-handlers/src/get-inventory.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        INVENTORY_TABLE: inventoryTable.tableName,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+    inventoryTable.grantReadData(getInventoryLambda);
+
+    // 3️⃣ Get Notifications Lambda
+    const getNotificationsLambda = new lambdaNodejs.NodejsFunction(this, 'GetNotificationsLambda', {
+      functionName: 'get-notifications',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/api-handlers/src/get-notifications.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        NOTIFICATIONS_TABLE: notificationsTable.tableName,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+    notificationsTable.grantReadData(getNotificationsLambda);
+
+    // 4️⃣ Get Billing Lambda
+    const getBillingLambda = new lambdaNodejs.NodejsFunction(this, 'GetBillingLambda', {
+      functionName: 'get-billing',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/api-handlers/src/get-billing.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        BILLING_TABLE: billingTable.tableName,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+    billingTable.grantReadData(getBillingLambda);
+
+    // 5️⃣ Get Dashboard Lambda
+    const getDashboardLambda = new lambdaNodejs.NodejsFunction(this, 'GetDashboardLambda', {
+      functionName: 'get-dashboard',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: 'lambda/api-handlers/src/get-dashboard.ts',
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        ORDERS_TABLE: ordersTable.tableName,
+        INVENTORY_TABLE: inventoryTable.tableName,
+        NOTIFICATIONS_TABLE: notificationsTable.tableName,
+        BILLING_TABLE: billingTable.tableName,
+      },
+      bundling: {
+        minify: true,
+        sourceMap: false,
+        externalModules: ['@aws-sdk/*'],
+      },
+    });
+    ordersTable.grantReadData(getDashboardLambda);
+    inventoryTable.grantReadData(getDashboardLambda);
+    notificationsTable.grantReadData(getDashboardLambda);
+    billingTable.grantReadData(getDashboardLambda);
+
+    // ═══════════════════════════════════════════════════════
+    // 🌐 Phase 5: API Gateway - GET Endpoints
+    // ═══════════════════════════════════════════════════════
+
+    // GET /orders
+    ordersResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(getOrdersLambda, {
+        proxy: true,
+      })
+    );
+
+    // GET /inventory
+    const inventoryResource = api.root.addResource('inventory');
+    inventoryResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(getInventoryLambda, {
+        proxy: true,
+      })
+    );
+
+    // GET /notifications
+    const notificationsResource = api.root.addResource('notifications');
+    notificationsResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(getNotificationsLambda, {
+        proxy: true,
+      })
+    );
+
+    // GET /billing
+    const billingResource = api.root.addResource('billing');
+    billingResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(getBillingLambda, {
+        proxy: true,
+      })
+    );
+
+    // GET /dashboard
+    const dashboardResource = api.root.addResource('dashboard');
+    dashboardResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(getDashboardLambda, {
+        proxy: true,
+      })
+    );
+
+    // ═══════════════════════════════════════════════════════
     // 📤 CloudFormation Outputs
     // ═══════════════════════════════════════════════════════
 
@@ -368,6 +531,42 @@ export class Project03Cdk03Stack extends cdk.Stack {
     new cdk.CfnOutput(this, 'BillingServiceLambdaName', {
       value: billingServiceLambda.functionName,
       description: 'Billing Service Lambda関数名',
+    });
+
+    // Phase 5 Outputs
+    new cdk.CfnOutput(this, 'FrontendBucketName', {
+      value: frontendBucket.bucketName,
+      description: 'フロントエンドホスティング用S3バケット名',
+    });
+
+    new cdk.CfnOutput(this, 'FrontendBucketWebsiteUrl', {
+      value: frontendBucket.bucketWebsiteUrl,
+      description: 'フロントエンドURL',
+    });
+
+    new cdk.CfnOutput(this, 'GetOrdersEndpoint', {
+      value: `${api.url}orders`,
+      description: '注文一覧取得エンドポイント（GET）',
+    });
+
+    new cdk.CfnOutput(this, 'GetInventoryEndpoint', {
+      value: `${api.url}inventory`,
+      description: '在庫一覧取得エンドポイント（GET）',
+    });
+
+    new cdk.CfnOutput(this, 'GetNotificationsEndpoint', {
+      value: `${api.url}notifications`,
+      description: '通知一覧取得エンドポイント（GET）',
+    });
+
+    new cdk.CfnOutput(this, 'GetBillingEndpoint', {
+      value: `${api.url}billing`,
+      description: '請求一覧取得エンドポイント（GET）',
+    });
+
+    new cdk.CfnOutput(this, 'GetDashboardEndpoint', {
+      value: `${api.url}dashboard`,
+      description: 'ダッシュボード統計取得エンドポイント（GET）',
     });
   }
 }
