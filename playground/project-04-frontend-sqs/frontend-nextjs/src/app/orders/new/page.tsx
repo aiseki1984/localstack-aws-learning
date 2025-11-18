@@ -38,6 +38,7 @@ export default function NewOrderPage() {
     control,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),
@@ -54,6 +55,46 @@ export default function NewOrderPage() {
   });
 
   const items = watch('items');
+
+  // ダミーデータを入力する関数
+  const fillDummyData = () => {
+    // ランダムなカスタマーIDを生成
+    const customerId = `customer-${Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0')}`;
+
+    // 在庫のある商品からランダムに選択
+    const availableProducts = inventory.filter((p) => p.stock > 0);
+
+    if (availableProducts.length === 0) {
+      alert('No products available in stock');
+      return;
+    }
+
+    // 1-3個のランダムな商品を選択
+    const numItems = Math.floor(Math.random() * 3) + 1;
+    const selectedProducts = availableProducts
+      .sort(() => Math.random() - 0.5)
+      .slice(0, Math.min(numItems, availableProducts.length));
+
+    // 選択した商品からアイテムを作成
+    const newItems = selectedProducts.map((product) => {
+      const quantity = Math.floor(Math.random() * Math.min(3, product.stock)) + 1;
+      return {
+        productId: product.productId,
+        productName: product.productName,
+        quantity,
+        price: product.price,
+      };
+    });
+
+    // resetを使って一度に全てのフォームデータを更新（再レンダリングは1回だけ）
+    reset({
+      customerId,
+      customerEmail: `${customerId}@example.com`,
+      items: newItems,
+    });
+  };
 
   // 合計金額を計算
   const calculateTotal = () => {
@@ -101,13 +142,22 @@ export default function NewOrderPage() {
             Fill in the order details below
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => router.push('/orders')}
-          className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700"
-        >
-          Cancel
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={fillDummyData}
+            className="px-4 py-2 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30"
+          >
+            Fill Dummy Data
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/orders')}
+            className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
 
       {error && (
